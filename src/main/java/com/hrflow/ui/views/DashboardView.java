@@ -5,9 +5,13 @@ import com.hrflow.dsa.sort.CandidateSortEngine;
 import com.hrflow.model.Candidate;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 
 import java.util.List;
 import java.util.Set;
@@ -106,21 +110,45 @@ public class DashboardView extends VBox {
         int undoDepth = context.getCandidateService().getActionStack().undoSize();
 
         row.getChildren().addAll(
-                createMetricCard("👥", "#FFF3EB", "#EA580C", "TOTAL APPLICANTS", String.valueOf(totalCandidates > 0 ? totalCandidates : 250), "Active in database", "Total", "#FFF3EB", "#C2410C"),
-                createMetricCard("👤", "#EFF6FF", "#2563EB", "SHORTLISTED", String.valueOf(shortlistedCount > 0 ? shortlistedCount : 30), "Qualified for next stage", "Qualified", "#FFF3EB", "#EA580C"),
-                createMetricCard("🗓️", "#F5F3FF", "#7C3AED", "SCHEDULED SESSIONS", String.valueOf(scheduledCount > 0 ? scheduledCount : 8), "Upcoming interview rounds", "Interviews", "#F5F3FF", "#6D28D9"),
-                createMetricCard("📄", "#ECFDF5", "#059669", "RECORDED ACTIONS", String.valueOf(undoDepth), "Actions in audit history", "Audit Log", "#FFF3EB", "#C2410C")
+                createMetricCard("👥", "#FFF3EB", "#EA580C", "TOTAL APPLICANTS", String.valueOf(totalCandidates > 0 ? totalCandidates : 250), "Active in database", "Total", "#FFF3EB", "#C2410C",
+                        Color.web("#F6D8C2", 0.75), Color.web("#FDF0E6", 0.60)),
+                createMetricCard("👤", "#EFF6FF", "#2563EB", "SHORTLISTED", String.valueOf(shortlistedCount > 0 ? shortlistedCount : 30), "Qualified for next stage", "Qualified", "#FFF3EB", "#EA580C",
+                        Color.web("#D8E9FE", 0.75), Color.web("#EDF4FE", 0.60)),
+                createMetricCard("🗓️", "#F5F3FF", "#7C3AED", "SCHEDULED SESSIONS", String.valueOf(scheduledCount > 0 ? scheduledCount : 8), "Upcoming interview rounds", "Interviews", "#F5F3FF", "#6D28D9",
+                        Color.web("#E7DCFA", 0.75), Color.web("#F5EFFD", 0.60)),
+                createMetricCard("📄", "#ECFDF5", "#059669", "RECORDED ACTIONS", String.valueOf(undoDepth), "Actions in audit history", "Audit Log", "#FFF3EB", "#C2410C",
+                        Color.web("#D4F4E2", 0.75), Color.web("#EAFBF0", 0.60))
         );
 
         getChildren().add(row);
     }
 
-    private VBox createMetricCard(String iconGlyph, String iconBg, String iconColor,
-                                 String title, String value, String desc,
-                                 String badgeText, String badgeBg, String badgeColor) {
-        VBox card = new VBox(6);
-        card.setStyle("-fx-background-color: #FFFFFF; -fx-background-radius: 16; -fx-border-color: #EFE4D6; -fx-border-radius: 16; -fx-padding: 18 18 16 18; -fx-effect: dropshadow(gaussian, rgba(160, 95, 30, 0.05), 10, 0, 0, 3);");
+    private StackPane createMetricCard(String iconGlyph, String iconBg, String iconColor,
+                                       String title, String value, String desc,
+                                       String badgeText, String badgeBg, String badgeColor,
+                                       Color wavePrimary, Color waveSecondary) {
+        StackPane card = new StackPane();
+        card.setStyle("-fx-background-color: #FFFFFF; -fx-background-radius: 16; -fx-border-color: #EFE4D6; -fx-border-radius: 16; -fx-effect: dropshadow(gaussian, rgba(160, 95, 30, 0.05), 10, 0, 0, 3);");
         HBox.setHgrow(card, Priority.ALWAYS);
+
+        // Wave decoration container with smooth 16px corner clip
+        WaveCanvas canvas = new WaveCanvas(wavePrimary, waveSecondary);
+        canvas.setMouseTransparent(true);
+        canvas.widthProperty().bind(card.widthProperty());
+        canvas.heightProperty().bind(card.heightProperty());
+
+        StackPane waveWrapper = new StackPane(canvas);
+        waveWrapper.setMouseTransparent(true);
+        Rectangle clip = new Rectangle();
+        clip.setArcWidth(32);
+        clip.setArcHeight(32);
+        clip.widthProperty().bind(card.widthProperty());
+        clip.heightProperty().bind(card.heightProperty());
+        waveWrapper.setClip(clip);
+
+        // Foreground content
+        VBox contentBox = new VBox(6);
+        contentBox.setPadding(new Insets(18, 18, 16, 18));
 
         HBox top = new HBox(14);
         top.setAlignment(Pos.TOP_LEFT);
@@ -150,8 +178,66 @@ public class DashboardView extends VBox {
         badge.setStyle("-fx-background-color: " + badgeBg + "; -fx-text-fill: " + badgeColor + "; -fx-font-size: 10.5px; -fx-font-weight: 700; -fx-padding: 3 9; -fx-background-radius: 12;");
 
         top.getChildren().addAll(icon, centerBox, badge);
-        card.getChildren().add(top);
+        contentBox.getChildren().add(top);
+
+        card.getChildren().addAll(waveWrapper, contentBox);
         return card;
+    }
+
+    private static class WaveCanvas extends Canvas {
+        private final Color primaryColor;
+        private final Color secondaryColor;
+
+        public WaveCanvas(Color primaryColor, Color secondaryColor) {
+            this.primaryColor = primaryColor;
+            this.secondaryColor = secondaryColor;
+            widthProperty().addListener(e -> draw());
+            heightProperty().addListener(e -> draw());
+            sceneProperty().addListener((obs, oldVal, newVal) -> {
+                if (newVal != null) javafx.application.Platform.runLater(this::draw);
+            });
+        }
+
+        private void draw() {
+            double w = getWidth();
+            double h = getHeight();
+            if (w <= 0 || h <= 0) return;
+            GraphicsContext gc = getGraphicsContext2D();
+            gc.clearRect(0, 0, w, h);
+
+            // Layer 1: Background softer undulating wave
+            gc.beginPath();
+            gc.moveTo(w * 0.28, h);
+            gc.bezierCurveTo(w * 0.46, h - 22, w * 0.68, h - 10, w, h - 34);
+            gc.lineTo(w, h);
+            gc.closePath();
+            gc.setFill(secondaryColor);
+            gc.fill();
+
+            // Layer 2: Foreground wave curving smoothly across the bottom right
+            gc.beginPath();
+            gc.moveTo(w * 0.38, h);
+            gc.bezierCurveTo(w * 0.54, h - 14, w * 0.72, h - 26, w, h - 10);
+            gc.lineTo(w, h);
+            gc.closePath();
+            gc.setFill(primaryColor);
+            gc.fill();
+        }
+
+        @Override
+        public boolean isResizable() {
+            return true;
+        }
+
+        @Override
+        public double prefWidth(double height) {
+            return getWidth();
+        }
+
+        @Override
+        public double prefHeight(double width) {
+            return getHeight();
+        }
     }
 
     private void buildCenterContent() {
