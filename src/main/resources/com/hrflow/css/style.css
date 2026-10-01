@@ -9,12 +9,27 @@
 /* Top Navbar & Card Selection */
 .top-navbar {
     -fx-background-color: #FFFFFF;
-    -fx-border-color: #EFE4D6;
-    -fx-border-width: 1px;
-    -fx-background-radius: 16px;
-    -fx-border-radius: 16px;
-    -fx-padding: 8 18;
-    -fx-effect: dropshadow(gaussian, rgba(160, 95, 30, 0.06), 14, 0, 0, 3);
+    -fx-border-color: transparent transparent #EBE0D3 transparent;
+    -fx-border-width: 0 0 1px 0;
+    -fx-background-radius: 0;
+    -fx-border-radius: 0;
+    -fx-padding: 9 28;
+    -fx-effect: dropshadow(gaussian, rgba(160, 95, 30, 0.05), 8, 0, 0, 2);
+}
+
+.dark-action-btn {
+    -fx-background-color: #1E293B;
+    -fx-text-fill: #FFFFFF;
+    -fx-font-weight: 700;
+    -fx-font-size: 12px;
+    -fx-padding: 7 16;
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+    -fx-cursor: hand;
+}
+
+.dark-action-btn:hover {
+    -fx-background-color: #0F172A;
 }
 
 .logo-icon-box {
