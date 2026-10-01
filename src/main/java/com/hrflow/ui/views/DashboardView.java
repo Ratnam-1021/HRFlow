@@ -36,9 +36,19 @@ public class DashboardView extends VBox {
     }
 
     private void buildHeader() {
+        StackPane bannerWrapper = new StackPane();
+        bannerWrapper.setAlignment(Pos.CENTER_LEFT);
+
+        // Ambient organic waves background
+        BannerWaveCanvas waveCanvas = new BannerWaveCanvas();
+        waveCanvas.setMouseTransparent(true);
+        waveCanvas.widthProperty().bind(bannerWrapper.widthProperty());
+        waveCanvas.heightProperty().bind(bannerWrapper.heightProperty());
+
+        // Header content
         HBox banner = new HBox(20);
         banner.setAlignment(Pos.CENTER_LEFT);
-        banner.setPadding(new Insets(8, 0, 10, 0));
+        banner.setPadding(new Insets(10, 0, 10, 0));
 
         // Left side: Welcome text
         VBox textBox = new VBox(6);
@@ -60,43 +70,148 @@ public class DashboardView extends VBox {
 
         textBox.getChildren().addAll(sub, welcomeBox, desc);
 
-        // Right side: Visual 3D floating card graphic
-        StackPane visual = new StackPane();
-        visual.setAlignment(Pos.CENTER_RIGHT);
-        visual.setPrefSize(180, 95);
-
-        VBox cardBack = new VBox();
-        cardBack.setPrefSize(110, 80);
-        cardBack.setMaxSize(110, 80);
-        cardBack.setStyle("-fx-background-color: rgba(255, 245, 235, 0.7); -fx-background-radius: 14; -fx-border-color: rgba(239, 228, 214, 0.8); -fx-border-radius: 14;");
-        cardBack.setRotate(8);
-
-        VBox cardFront = new VBox(6);
-        cardFront.setPrefSize(115, 85);
-        cardFront.setMaxSize(115, 85);
-        cardFront.setStyle("-fx-background-color: #FFFFFF; -fx-background-radius: 14; -fx-border-color: #EFE4D6; -fx-border-radius: 14; -fx-padding: 8; -fx-effect: dropshadow(gaussian, rgba(160, 95, 30, 0.08), 10, 0, 0, 3);");
-
-        HBox topRow = new HBox(6);
-        topRow.setAlignment(Pos.CENTER_LEFT);
-        Label iconUser = new Label("👤");
-        iconUser.setStyle("-fx-font-size: 13px; -fx-background-color: #FFF2E8; -fx-background-radius: 50%; -fx-padding: 3;");
-        Region barA = new Region(); barA.setPrefSize(45, 4); barA.setStyle("-fx-background-color: #F0E6D8; -fx-background-radius: 2;");
-        topRow.getChildren().addAll(iconUser, barA);
-
-        Region barB = new Region(); barB.setPrefSize(80, 4); barB.setStyle("-fx-background-color: #F4EAE0; -fx-background-radius: 2;");
-        Region barC = new Region(); barC.setPrefSize(60, 4); barC.setStyle("-fx-background-color: #F4EAE0; -fx-background-radius: 2;");
-
-        HBox botRow = new HBox();
-        botRow.setAlignment(Pos.CENTER_RIGHT);
-        Label check = new Label("✓");
-        check.setStyle("-fx-background-color: #FFF2E8; -fx-text-fill: #EA580C; -fx-font-weight: 800; -fx-font-size: 10px; -fx-background-radius: 50%; -fx-padding: 1 5;");
-        botRow.getChildren().add(check);
-
-        cardFront.getChildren().addAll(topRow, barB, barC, botRow);
-        visual.getChildren().addAll(cardBack, cardFront);
+        // Right side: Skeuomorphic 3D Candidate Resume Cards
+        StackPane visual = buildSkeuomorphicResumeCards();
 
         banner.getChildren().addAll(textBox, visual);
-        getChildren().add(banner);
+        bannerWrapper.getChildren().addAll(waveCanvas, banner);
+        getChildren().add(bannerWrapper);
+    }
+
+    private StackPane buildSkeuomorphicResumeCards() {
+        StackPane container = new StackPane();
+        container.setAlignment(Pos.CENTER_RIGHT);
+        container.setPrefSize(330, 160);
+        container.setMinSize(330, 160);
+
+        // Card 1 (Back left - ghosted candidate profile)
+        VBox card1 = new VBox(6);
+        card1.setPrefSize(100, 120);
+        card1.setMaxSize(100, 120);
+        card1.setTranslateX(-80);
+        card1.setTranslateY(12);
+        card1.setPadding(new Insets(10));
+        card1.setStyle("-fx-background-color: rgba(255, 255, 255, 0.70); -fx-background-radius: 16px; -fx-border-color: rgba(240, 226, 212, 0.85); -fx-border-radius: 16px; -fx-border-width: 1.5px; -fx-effect: dropshadow(gaussian, rgba(160, 95, 30, 0.08), 12, 0, 0, 4);");
+
+        HBox c1Top = new HBox();
+        c1Top.setAlignment(Pos.CENTER_LEFT);
+        Label c1Av = new Label("👤");
+        c1Av.setStyle("-fx-font-size: 14px; -fx-background-color: #FFF2E8; -fx-text-fill: #C2410C; -fx-background-radius: 50%; -fx-padding: 3;");
+        c1Top.getChildren().add(c1Av);
+
+        Region c1Bar1 = new Region(); c1Bar1.setPrefSize(55, 5); c1Bar1.setMaxSize(55, 5); c1Bar1.setStyle("-fx-background-color: #E6D9CB; -fx-background-radius: 3px;");
+        Region c1Bar2 = new Region(); c1Bar2.setPrefSize(42, 4); c1Bar2.setMaxSize(42, 4); c1Bar2.setStyle("-fx-background-color: #EFE4D6; -fx-background-radius: 2px;");
+        Region c1Bar3 = new Region(); c1Bar3.setPrefSize(48, 4); c1Bar3.setMaxSize(48, 4); c1Bar3.setStyle("-fx-background-color: #F4EAE0; -fx-background-radius: 2px;");
+        card1.getChildren().addAll(c1Top, c1Bar1, c1Bar2, c1Bar3);
+
+        // Card 3 (Right - Verified candidate resume sheet)
+        VBox card3 = new VBox(7);
+        card3.setPrefSize(125, 136);
+        card3.setMaxSize(125, 136);
+        card3.setTranslateX(82);
+        card3.setTranslateY(8);
+        card3.setPadding(new Insets(12));
+        card3.setStyle("-fx-background-color: #FFFFFF; -fx-background-radius: 18px; -fx-border-color: #F3E6D6; -fx-border-radius: 18px; -fx-border-width: 1.5px; -fx-effect: dropshadow(gaussian, rgba(180, 105, 30, 0.14), 18, 0, 0, 6);");
+
+        Region rLine1 = new Region(); rLine1.setPrefSize(82, 5); rLine1.setMaxSize(82, 5); rLine1.setStyle("-fx-background-color: #E2D4C4; -fx-background-radius: 3px;");
+        Region rLine2 = new Region(); rLine2.setPrefSize(65, 5); rLine2.setMaxSize(65, 5); rLine2.setStyle("-fx-background-color: #EBE0D2; -fx-background-radius: 3px;");
+        Region rLine3 = new Region(); rLine3.setPrefSize(52, 5); rLine3.setMaxSize(52, 5); rLine3.setStyle("-fx-background-color: #F2E6DC; -fx-background-radius: 3px;");
+
+        HBox chkBox = new HBox();
+        chkBox.setAlignment(Pos.CENTER_RIGHT);
+        chkBox.setPadding(new Insets(4, 0, 0, 0));
+        StackPane badge = new StackPane();
+        badge.setPrefSize(30, 30);
+        badge.setMaxSize(30, 30);
+        badge.setStyle("-fx-background-color: #FFF3EB; -fx-background-radius: 8px; -fx-border-color: #FED7AA; -fx-border-radius: 8px; -fx-border-width: 1px; -fx-effect: dropshadow(gaussian, rgba(234, 88, 12, 0.18), 6, 0, 0, 2);");
+        Label chk = new Label("✓");
+        chk.setStyle("-fx-text-fill: #EA580C; -fx-font-size: 15px; -fx-font-weight: 800;");
+        badge.getChildren().add(chk);
+        chkBox.getChildren().add(badge);
+
+        card3.getChildren().addAll(rLine1, rLine2, rLine3, chkBox);
+
+        // Card 2 (Center - Hero Candidate Profile Card)
+        VBox card2 = new VBox(8);
+        card2.setPrefSize(112, 148);
+        card2.setMaxSize(112, 148);
+        card2.setTranslateX(0);
+        card2.setTranslateY(-4);
+        card2.setPadding(new Insets(12));
+        card2.setStyle("-fx-background-color: #FFFFFF; -fx-background-radius: 18px; -fx-border-color: #F3E6D6; -fx-border-radius: 18px; -fx-border-width: 1.5px; -fx-effect: dropshadow(gaussian, rgba(180, 105, 30, 0.16), 22, 0, 0, 8);");
+
+        HBox avBox = new HBox();
+        avBox.setAlignment(Pos.CENTER);
+        avBox.setPrefSize(42, 42);
+        avBox.setMaxSize(42, 42);
+        avBox.setStyle("-fx-background-color: #FFF2E8; -fx-background-radius: 12px; -fx-border-color: #FED7AA; -fx-border-radius: 12px; -fx-border-width: 1px;");
+        Label avIcon = new Label("👤");
+        avIcon.setStyle("-fx-font-size: 20px; -fx-text-fill: #EA580C;");
+        avBox.getChildren().add(avIcon);
+
+        Region line1 = new Region(); line1.setPrefSize(72, 6); line1.setMaxSize(72, 6); line1.setStyle("-fx-background-color: #E2D4C4; -fx-background-radius: 3px;");
+        Region line2 = new Region(); line2.setPrefSize(50, 5); line2.setMaxSize(50, 5); line2.setStyle("-fx-background-color: #EBE0D2; -fx-background-radius: 3px;");
+        Region line3 = new Region(); line3.setPrefSize(60, 4); line3.setMaxSize(60, 4); line3.setStyle("-fx-background-color: #F5EAE0; -fx-background-radius: 2px;");
+        card2.getChildren().addAll(avBox, line1, line2, line3);
+
+        container.getChildren().addAll(card1, card3, card2);
+        return container;
+    }
+
+    private static class BannerWaveCanvas extends Canvas {
+        public BannerWaveCanvas() {
+            widthProperty().addListener(e -> draw());
+            heightProperty().addListener(e -> draw());
+            sceneProperty().addListener((obs, oldVal, newVal) -> {
+                if (newVal != null) javafx.application.Platform.runLater(this::draw);
+            });
+        }
+
+        private void draw() {
+            double w = getWidth();
+            double h = getHeight();
+            if (w <= 0 || h <= 0) return;
+            GraphicsContext gc = getGraphicsContext2D();
+            gc.clearRect(0, 0, w, h);
+
+            // Ambient soft background glow / radial sweep on right
+            gc.setFill(Color.web("#FFF3E8", 0.55));
+            gc.fillOval(w * 0.48, -h * 0.35, w * 0.60, h * 1.7);
+
+            // Wave 1: Gentle sweeping wave from top-right to bottom
+            gc.beginPath();
+            gc.moveTo(w * 0.40, 0);
+            gc.bezierCurveTo(w * 0.54, h * 0.45, w * 0.50, h * 0.80, w * 0.64, h);
+            gc.lineTo(w, h);
+            gc.lineTo(w, 0);
+            gc.closePath();
+            gc.setFill(Color.web("#FDEBDC", 0.45));
+            gc.fill();
+
+            // Wave 2: Prominent organic wave behind cards
+            gc.beginPath();
+            gc.moveTo(w * 0.58, 0);
+            gc.bezierCurveTo(w * 0.70, h * 0.50, w * 0.60, h * 0.85, w * 0.76, h);
+            gc.lineTo(w, h);
+            gc.lineTo(w, 0);
+            gc.closePath();
+            gc.setFill(Color.web("#FCDBC4", 0.40));
+            gc.fill();
+
+            // Wave 3: Subtle accent wave at the bottom-right
+            gc.beginPath();
+            gc.moveTo(w * 0.68, h);
+            gc.bezierCurveTo(w * 0.80, h - 35, w * 0.88, h - 15, w, h - 42);
+            gc.lineTo(w, h);
+            gc.closePath();
+            gc.setFill(Color.web("#FAD3B8", 0.50));
+            gc.fill();
+        }
+
+        @Override
+        public boolean isResizable() {
+            return true;
+        }
     }
 
     private void buildMetricsRow() {
