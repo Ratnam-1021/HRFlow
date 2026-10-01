@@ -34,32 +34,39 @@ public class MainLayout extends BorderPane {
         navBar.getStyleClass().add("top-navbar");
         navBar.setAlignment(Pos.CENTER_LEFT);
 
-        // Real HRFlow Brand Icon
+        // High-definition HRFlow Brand Icon
         ImageView logoIcon = new ImageView();
         try {
             var is = getClass().getResourceAsStream("/com/hrflow/images/app_icon_orange.png");
             if (is != null) {
-                Image img = new Image(is, 34, 34, true, true);
+                Image img = new Image(is); // Load full high-res without downsampling
                 logoIcon.setImage(img);
-                Rectangle clip = new Rectangle(34, 34);
-                clip.setArcWidth(10);
-                clip.setArcHeight(10);
-                logoIcon.setClip(clip);
+                logoIcon.setFitWidth(38);
+                logoIcon.setFitHeight(38);
+                logoIcon.setPreserveRatio(true);
+                logoIcon.setSmooth(true);
             }
         } catch (Exception ignored) {}
 
-        // Brand on the left
-        VBox brandBox = new VBox(0);
+        // Brand Typography on the left: "HRFlow" + "RECRUITMENT & HIRING"
+        VBox brandBox = new VBox(-1);
         brandBox.setAlignment(Pos.CENTER_LEFT);
+
         HBox brandTitleBox = new HBox(0);
+        brandTitleBox.setAlignment(Pos.BASELINE_LEFT);
         Label hrLbl = new Label("HR");
-        hrLbl.setStyle("-fx-font-size: 19px; -fx-font-weight: 800; -fx-text-fill: #1A110B;");
+        hrLbl.setStyle("-fx-font-size: 20px; -fx-font-weight: 800; -fx-text-fill: #1A110B; -fx-font-family: -apple-system, 'SF Pro Display', 'Inter', sans-serif;");
         Label flowLbl = new Label("Flow");
-        flowLbl.setStyle("-fx-font-size: 19px; -fx-font-weight: 800; -fx-text-fill: #EA580C;");
+        flowLbl.setStyle("-fx-font-size: 20px; -fx-font-weight: 800; -fx-text-fill: #EA580C; -fx-font-family: -apple-system, 'SF Pro Display', 'Inter', sans-serif;");
         brandTitleBox.getChildren().addAll(hrLbl, flowLbl);
 
-        // Left side: Brand with logo
-        HBox leftBox = new HBox(10);
+        Label subLbl = new Label("RECRUITMENT & HIRING");
+        subLbl.setStyle("-fx-font-size: 8.5px; -fx-font-weight: 700; -fx-text-fill: #8C7A6B; -fx-letter-spacing: 0.8px; -fx-font-family: -apple-system, 'SF Pro Text', 'Inter', sans-serif;");
+
+        brandBox.getChildren().addAll(brandTitleBox, subLbl);
+
+        // Left side: Brand container with logo + HRFlow text
+        HBox leftBox = new HBox(11);
         leftBox.setAlignment(Pos.CENTER_LEFT);
         leftBox.getChildren().addAll(logoIcon, brandBox);
 
