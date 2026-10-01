@@ -99,64 +99,27 @@ public class DashboardView extends VBox {
     }
 
     private void buildCenterContent() {
-        HBox contentBox = new HBox(20);
-        VBox.setVgrow(contentBox, Priority.ALWAYS);
+        // Full-width panel: Top Ranked Candidates
+        VBox card = new VBox(12);
+        card.getStyleClass().add("glass-card");
+        VBox.setVgrow(card, Priority.ALWAYS);
 
-        // Left Panel: Top Shortlisted Candidates
-        VBox leftCard = new VBox(12);
-        leftCard.getStyleClass().add("glass-card");
-        HBox.setHgrow(leftCard, Priority.ALWAYS);
-
-        HBox leftHeader = new HBox();
-        Label leftTitle = new Label("Top Ranked Candidates");
-        leftTitle.setStyle("-fx-font-size: 15px; -fx-font-weight: 700; -fx-text-fill: #261B12;");
-        Region sp1 = new Region();
-        HBox.setHgrow(sp1, Priority.ALWAYS);
-        Button viewAllBtn = new Button("View Pipeline →");
+        HBox header = new HBox();
+        header.setAlignment(Pos.CENTER_LEFT);
+        Label title = new Label("Top Ranked Candidates");
+        title.setStyle("-fx-font-size: 15px; -fx-font-weight: 700; -fx-text-fill: #261B12;");
+        Region sp = new Region();
+        HBox.setHgrow(sp, Priority.ALWAYS);
+        Button viewAllBtn = new Button("View Full Pipeline →");
         viewAllBtn.getStyleClass().add("btn-secondary");
         viewAllBtn.setOnAction(e -> navigationHandler.accept("recruitment"));
-        leftHeader.getChildren().addAll(leftTitle, sp1, viewAllBtn);
+        header.getChildren().addAll(title, sp, viewAllBtn);
 
         TableView<Candidate> candidateTable = createCandidateTable();
         VBox.setVgrow(candidateTable, Priority.ALWAYS);
-        leftCard.getChildren().addAll(leftHeader, candidateTable);
+        card.getChildren().addAll(header, candidateTable);
 
-        // Right Panel: Recruitment Workflow Overview
-        VBox rightCard = new VBox(14);
-        rightCard.getStyleClass().add("glass-card");
-        rightCard.setPrefWidth(400);
-
-        Label rightTitle = new Label("Recruitment Workflow Overview");
-        rightTitle.setStyle("-fx-font-size: 15px; -fx-font-weight: 700; -fx-text-fill: #261B12;");
-
-        VBox p1 = createArchitectureTile("1. Sourcing & Screening",
-                "• Instant skill matching across applicant resumes\n• Weighted candidate evaluation & scoring\n• Rapid shortlisting of high-potential talent",
-                "-fx-border-color: #EA580C;");
-
-        VBox p2 = createArchitectureTile("2. Interview Scheduling",
-                "• Automated time slot & room assignment\n• Prioritized rounds for top-scoring candidates\n• Conflict prevention for interviewers and facilities",
-                "-fx-border-color: #D97706;");
-
-        VBox p3 = createArchitectureTile("3. Audit & Activity Tracking",
-                "• Complete timestamped history of hiring decisions\n• One-click undo for accidental status updates\n• Transparent, compliance-ready action trail",
-                "-fx-border-color: #C2410C;");
-
-        rightCard.getChildren().addAll(rightTitle, p1, p2, p3);
-
-        contentBox.getChildren().addAll(leftCard, rightCard);
-        getChildren().add(contentBox);
-    }
-
-    private VBox createArchitectureTile(String heading, String body, String borderStyle) {
-        VBox tile = new VBox(6);
-        tile.setStyle("-fx-background-color: #FBF6EE; -fx-padding: 12; -fx-background-radius: 8; -fx-border-width: 0 0 0 3.5; " + borderStyle);
-        Label h = new Label(heading);
-        h.setStyle("-fx-font-size: 13px; -fx-font-weight: 700; -fx-text-fill: #2B1E13;");
-        Label b = new Label(body);
-        b.setWrapText(true);
-        b.setStyle("-fx-font-size: 12px; -fx-text-fill: #5E4E3F; -fx-line-spacing: 2;");
-        tile.getChildren().addAll(h, b);
-        return tile;
+        getChildren().add(card);
     }
 
     private TableView<Candidate> createCandidateTable() {
@@ -195,10 +158,40 @@ public class DashboardView extends VBox {
             }
         });
 
-        table.getColumns().addAll(colName, colRole, colScore, colExp);
+        TableColumn<Candidate, String> colSkills = new TableColumn<>("Key Skills");
+        colSkills.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(
+                String.join(", ", cellData.getValue().getSkills())));
+
+        TableColumn<Candidate, String> colStatus = new TableColumn<>("Status");
+        colStatus.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(
+                cellData.getValue().getStatus().name()));
+        colStatus.setCellFactory(col -> new TableCell<>() {
+            @Override
+            protected void updateItem(String status, boolean empty) {
+                super.updateItem(status, empty);
+                if (empty || status == null) {
+                    setText(null);
+                    setGraphic(null);
+                } else {
+                    Label badge = new Label(status);
+                    if (status.contains("SHORTLIST")) {
+                        badge.setStyle("-fx-background-color: #DCFCE7; -fx-text-fill: #15803D; -fx-font-weight: 700; -fx-font-size: 11px; -fx-padding: 3 8; -fx-background-radius: 8;");
+                    } else if (status.contains("INTERVIEW")) {
+                        badge.setStyle("-fx-background-color: #FEF3C7; -fx-text-fill: #B45309; -fx-font-weight: 700; -fx-font-size: 11px; -fx-padding: 3 8; -fx-background-radius: 8;");
+                    } else if (status.contains("REJECT")) {
+                        badge.setStyle("-fx-background-color: #FFE4E6; -fx-text-fill: #BE123C; -fx-font-weight: 700; -fx-font-size: 11px; -fx-padding: 3 8; -fx-background-radius: 8;");
+                    } else {
+                        badge.setStyle("-fx-background-color: #F4EAE0; -fx-text-fill: #6E5F50; -fx-font-weight: 700; -fx-font-size: 11px; -fx-padding: 3 8; -fx-background-radius: 8;");
+                    }
+                    setGraphic(badge);
+                }
+            }
+        });
+
+        table.getColumns().addAll(colName, colRole, colExp, colSkills, colScore, colStatus);
 
         List<Candidate> topCandidates = CandidateSortEngine.rankAndGetTopK(
-                context.getCandidateService().getAllCandidates(), Set.of("Java", "SQL"), 6
+                context.getCandidateService().getAllCandidates(), Set.of("Java", "SQL", "Docker"), 10
         );
         table.getItems().addAll(topCandidates);
 
