@@ -48,18 +48,18 @@ public class MainLayout extends BorderPane {
         addNavItem(navList, "dashboard", "📊  Dashboard");
         addNavItem(navList, "recruitment", "👥  Candidate Pipeline");
         addNavItem(navList, "scheduling", "🗓️  Interview Scheduler");
-        addNavItem(navList, "history", "📜  Action History & Stack");
+        addNavItem(navList, "history", "📜  Activity & Audit Log");
 
         Region spacer = new Region();
         VBox.setVgrow(spacer, Priority.ALWAYS);
 
-        // Footer info card detailing the exact 3-pillar architecture
+        // Footer status card
         VBox engineInfo = new VBox(4);
-        engineInfo.setStyle("-fx-background-color: #131d33; -fx-padding: 12; -fx-background-radius: 8; -fx-border-color: #1e293b; -fx-border-radius: 8;");
-        Label eTitle = new Label("Recruitment Engine");
-        eTitle.setStyle("-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #34d399;");
-        Label eDesc = new Label("P1: HashMap, Search & Sort\nP2: Queue & Priority Queue\nP3: Dual-Stack Undo / Redo");
-        eDesc.setStyle("-fx-font-size: 10px; -fx-text-fill: #94a3b8;");
+        engineInfo.setStyle("-fx-background-color: #FAF5ED; -fx-padding: 12; -fx-background-radius: 8; -fx-border-color: #EFE4D6; -fx-border-radius: 8;");
+        Label eTitle = new Label("System Status");
+        eTitle.setStyle("-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #EA580C;");
+        Label eDesc = new Label("• Pipeline Active\n• Scheduler Ready\n• Audit Logging Enabled");
+        eDesc.setStyle("-fx-font-size: 10.5px; -fx-text-fill: #5C4D3E;");
         engineInfo.getChildren().addAll(eTitle, eDesc);
 
         sidebar.getChildren().addAll(brandBox, navList, spacer, engineInfo);
@@ -88,9 +88,9 @@ public class MainLayout extends BorderPane {
         HBox liveIndicator = new HBox(6);
         liveIndicator.setAlignment(Pos.CENTER);
         Label dot = new Label("●");
-        dot.setStyle("-fx-text-fill: #10b981; -fx-font-size: 10px;");
+        dot.setStyle("-fx-text-fill: #15803D; -fx-font-size: 10px;");
         Label status = new Label("Recruitment Pipeline Online");
-        status.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 12px; -fx-font-weight: 600;");
+        status.setStyle("-fx-text-fill: #5C4D3E; -fx-font-size: 12px; -fx-font-weight: 600;");
         liveIndicator.getChildren().addAll(dot, status);
 
         topBar.getChildren().addAll(topTitle, spacer, liveIndicator);
@@ -108,10 +108,10 @@ public class MainLayout extends BorderPane {
 
         switch (key) {
             case "dashboard" -> topTitle.setText("Recruitment Overview & Pipeline Metrics");
-            case "recruitment" -> topTitle.setText("Candidate Screening, Sorting & Ranking");
-            case "scheduling" -> topTitle.setText("Queue & PriorityQueue Interview Scheduler");
+            case "recruitment" -> topTitle.setText("Candidate Sourcing & Screening");
+            case "scheduling" -> topTitle.setText("Interview Scheduling & Calendar");
             case "history" -> {
-                topTitle.setText("Action History & Stack Undo / Redo Control");
+                topTitle.setText("Activity History & Audit Trail");
                 if (view instanceof HistoryView hv) {
                     hv.refreshHistory();
                 }

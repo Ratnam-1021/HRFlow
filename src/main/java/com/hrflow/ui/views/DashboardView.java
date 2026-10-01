@@ -38,14 +38,14 @@ public class DashboardView extends VBox {
         VBox titleBox = new VBox(4);
         Label title = new Label("Recruitment & Hiring Subsystem");
         title.setStyle("-fx-font-size: 22px; -fx-font-weight: 800; -fx-text-fill: #261B12;");
-        Label subtitle = new Label("Algorithmic talent acquisition pipeline: Indexing (HashMap), Search, Ranking (Selection Sort), Queue Scheduling, and Stack History.");
+        Label subtitle = new Label("End-to-end recruitment management: applicant screening, smart candidate ranking, interview scheduling, and activity logs.");
         subtitle.setStyle("-fx-font-size: 13px; -fx-text-fill: #786958;");
         titleBox.getChildren().addAll(title, subtitle);
 
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        Button pipelineBtn = new Button("👥 Open Candidate Pipeline");
+        Button pipelineBtn = new Button("👥 View Candidate Pipeline");
         pipelineBtn.getStyleClass().add("btn-primary");
         pipelineBtn.setOnAction(e -> navigationHandler.accept("recruitment"));
 
@@ -64,16 +64,16 @@ public class DashboardView extends VBox {
         int undoDepth = context.getCandidateService().getActionStack().undoSize();
 
         row.getChildren().addAll(
-                createMetricCard("APPLICANT POOL", String.valueOf(totalCandidates), "Indexed via HashMap", "badge-indigo"),
-                createMetricCard("SHORTLISTED", String.valueOf(shortlistedCount > 0 ? shortlistedCount : 20), "Ranked via Selection Sort", "badge-emerald"),
-                createMetricCard("INTERVIEW SESSIONS", String.valueOf(scheduledCount > 0 ? scheduledCount : 8), "Queue & Priority Queue", "badge-amber"),
-                createMetricCard("STACK UNDO DEPTH", String.valueOf(undoDepth), "LIFO Action History", "badge-rose")
+                createMetricCard("TOTAL APPLICANTS", String.valueOf(totalCandidates), "Active in database", "Total"),
+                createMetricCard("SHORTLISTED", String.valueOf(shortlistedCount > 0 ? shortlistedCount : 20), "Qualified for next stage", "Qualified"),
+                createMetricCard("SCHEDULED SESSIONS", String.valueOf(scheduledCount > 0 ? scheduledCount : 8), "Upcoming interview rounds", "Interviews"),
+                createMetricCard("RECORDED ACTIONS", String.valueOf(undoDepth), "Actions in audit history", "Audit Log")
         );
 
         getChildren().add(row);
     }
 
-    private VBox createMetricCard(String title, String value, String desc, String badgeClass) {
+    private VBox createMetricCard(String title, String value, String desc, String badgeText) {
         VBox card = new VBox(8);
         card.getStyleClass().add("metric-card");
         HBox.setHgrow(card, Priority.ALWAYS);
@@ -84,8 +84,8 @@ public class DashboardView extends VBox {
         lblTitle.getStyleClass().add("metric-title");
         Region sp = new Region();
         HBox.setHgrow(sp, Priority.ALWAYS);
-        Label badge = new Label("DSA Engine");
-        badge.getStyleClass().addAll(badgeClass);
+        Label badge = new Label(badgeText);
+        badge.getStyleClass().addAll("badge-amber");
         top.getChildren().addAll(lblTitle, sp, badge);
 
         Label lblVal = new Label(value);
@@ -102,13 +102,13 @@ public class DashboardView extends VBox {
         HBox contentBox = new HBox(20);
         VBox.setVgrow(contentBox, Priority.ALWAYS);
 
-        // Left Panel: Top Shortlisted Candidates (Selection Sort top 6)
+        // Left Panel: Top Shortlisted Candidates
         VBox leftCard = new VBox(12);
         leftCard.getStyleClass().add("glass-card");
         HBox.setHgrow(leftCard, Priority.ALWAYS);
 
         HBox leftHeader = new HBox();
-        Label leftTitle = new Label("Top Ranked Candidates (Selection Sort)");
+        Label leftTitle = new Label("Top Ranked Candidates");
         leftTitle.setStyle("-fx-font-size: 15px; -fx-font-weight: 700; -fx-text-fill: #261B12;");
         Region sp1 = new Region();
         HBox.setHgrow(sp1, Priority.ALWAYS);
@@ -121,24 +121,24 @@ public class DashboardView extends VBox {
         VBox.setVgrow(candidateTable, Priority.ALWAYS);
         leftCard.getChildren().addAll(leftHeader, candidateTable);
 
-        // Right Panel: DSA Subsystem Flow Architecture Summary
+        // Right Panel: Recruitment Workflow Overview
         VBox rightCard = new VBox(14);
         rightCard.getStyleClass().add("glass-card");
-        rightCard.setPrefWidth(420);
+        rightCard.setPrefWidth(400);
 
-        Label rightTitle = new Label("Subsystem Architecture & DSA Flow");
+        Label rightTitle = new Label("Recruitment Workflow Overview");
         rightTitle.setStyle("-fx-font-size: 15px; -fx-font-weight: 700; -fx-text-fill: #261B12;");
 
-        VBox p1 = createArchitectureTile("1. Recruitment (Search & Ranking)",
-                "• HashMap: O(1) Candidate skill lookup\n• Linear Search: Prefix autocomplete filtering\n• Binary Search: O(log N) sorted ID lookup\n• Sorting: Selection Sort (Top-K) & Insertion Sort",
+        VBox p1 = createArchitectureTile("1. Sourcing & Screening",
+                "• Instant skill matching across applicant resumes\n• Weighted candidate evaluation & scoring\n• Rapid shortlisting of high-potential talent",
                 "-fx-border-color: #EA580C;");
 
-        VBox p2 = createArchitectureTile("2. Scheduling (Queue Engine)",
-                "• Queue (FIFO): First-Come, First-Served interviews\n• Priority Queue: High-score applicants first\n• Availability Check: Instant slot & room collision check",
+        VBox p2 = createArchitectureTile("2. Interview Scheduling",
+                "• Automated time slot & room assignment\n• Prioritized rounds for top-scoring candidates\n• Conflict prevention for interviewers and facilities",
                 "-fx-border-color: #D97706;");
 
-        VBox p3 = createArchitectureTile("3. History (Stack Engine)",
-                "• Dual-Stack: LIFO Undo and Redo\n• Full Audit Trail: Trace status modifications in real time",
+        VBox p3 = createArchitectureTile("3. Audit & Activity Tracking",
+                "• Complete timestamped history of hiring decisions\n• One-click undo for accidental status updates\n• Transparent, compliance-ready action trail",
                 "-fx-border-color: #C2410C;");
 
         rightCard.getChildren().addAll(rightTitle, p1, p2, p3);
@@ -154,7 +154,7 @@ public class DashboardView extends VBox {
         h.setStyle("-fx-font-size: 13px; -fx-font-weight: 700; -fx-text-fill: #2B1E13;");
         Label b = new Label(body);
         b.setWrapText(true);
-        b.setStyle("-fx-font-size: 11.5px; -fx-text-fill: #5E4E3F; -fx-line-spacing: 2;");
+        b.setStyle("-fx-font-size: 12px; -fx-text-fill: #5E4E3F; -fx-line-spacing: 2;");
         tile.getChildren().addAll(h, b);
         return tile;
     }

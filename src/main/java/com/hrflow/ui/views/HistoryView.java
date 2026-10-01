@@ -19,10 +19,10 @@ public class HistoryView extends VBox {
     private final AppContext context = AppContext.getInstance();
     private final ObservableList<HRAction> historyData = FXCollections.observableArrayList();
     private final TableView<HRAction> table = new TableView<>();
-    private final Label undoCountLabel = new Label("Undo Stack Depth: 0");
-    private final Label redoCountLabel = new Label("Redo Stack Depth: 0");
-    private final Button undoBtn = new Button("↩ Undo (Pop Stack)");
-    private final Button redoBtn = new Button("↪ Redo (Pop Redo)");
+    private final Label undoCountLabel = new Label("Undoable Actions: 0");
+    private final Label redoCountLabel = new Label("Redoable Actions: 0");
+    private final Button undoBtn = new Button("↩ Undo Action");
+    private final Button redoBtn = new Button("↪ Redo Action");
 
     public HistoryView() {
         setSpacing(18);
@@ -37,9 +37,9 @@ public class HistoryView extends VBox {
 
     private void buildHeader() {
         VBox titleBox = new VBox(4);
-        Label title = new Label("Recruitment Action History & Stack Control");
+        Label title = new Label("Recruitment Activity & Audit Log");
         title.setStyle("-fx-font-size: 22px; -fx-font-weight: 800; -fx-text-fill: #261B12;");
-        Label subtitle = new Label("Dual-Stack LIFO architecture tracking candidate status transitions with reversible Undo & Redo operations.");
+        Label subtitle = new Label("Real-time chronological log of candidate status updates, shortlists, and rejections with one-click undo.");
         subtitle.setStyle("-fx-font-size: 13px; -fx-text-fill: #786958;");
         titleBox.getChildren().addAll(title, subtitle);
         getChildren().add(titleBox);
@@ -132,8 +132,8 @@ public class HistoryView extends VBox {
     public void refreshHistory() {
         HRActionStack stack = context.getCandidateService().getActionStack();
         historyData.setAll(stack.getHistoryAuditLog());
-        undoCountLabel.setText("Undo Stack (LIFO depth): " + stack.undoSize() + " items");
-        redoCountLabel.setText("Redo Stack (LIFO depth): " + stack.redoSize() + " items");
+        undoCountLabel.setText("Undoable Actions: " + stack.undoSize());
+        redoCountLabel.setText("Redoable Actions: " + stack.redoSize());
         undoBtn.setDisable(!stack.canUndo());
         redoBtn.setDisable(!stack.canRedo());
     }

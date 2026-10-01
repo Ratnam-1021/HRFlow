@@ -28,7 +28,7 @@ public class RecruitmentView extends VBox {
     private final Spinner<Integer> topKSpinner = new Spinner<>(5, 100, 20, 5);
     private final Button undoBtn = new Button("↩ Undo");
     private final Button redoBtn = new Button("↪ Redo");
-    private final Label historyStatusLabel = new Label("History Stack: No actions performed yet.");
+    private final Label historyStatusLabel = new Label("Ready — No recent status changes.");
 
     public RecruitmentView() {
         setSpacing(18);
@@ -44,9 +44,9 @@ public class RecruitmentView extends VBox {
 
     private void buildHeader() {
         VBox titleBox = new VBox(4);
-        Label title = new Label("Candidate Pipeline & Algorithmic Screening");
+        Label title = new Label("Candidate Pipeline & Screening");
         title.setStyle("-fx-font-size: 22px; -fx-font-weight: 800; -fx-text-fill: #261B12;");
-        Label subtitle = new Label("HashMap indexing, Linear prefix search, Selection/Insertion Sort ranking, and Stack-based Undo/Redo.");
+        Label subtitle = new Label("Search applicants by skills, rank candidates by overall fit score, and manage shortlisting status.");
         subtitle.setStyle("-fx-font-size: 13px; -fx-text-fill: #786958;");
         titleBox.getChildren().addAll(title, subtitle);
         getChildren().add(titleBox);
@@ -61,7 +61,7 @@ public class RecruitmentView extends VBox {
 
         VBox searchBox = new VBox(4);
         HBox.setHgrow(searchBox, Priority.ALWAYS);
-        Label searchLabel = new Label("HashMap + Linear Search Autocomplete:");
+        Label searchLabel = new Label("Search by Skill:");
         searchLabel.setStyle("-fx-font-size: 12px; -fx-font-weight: 700; -fx-text-fill: #5C4D3E;");
 
         skillSearchField.setPromptText("Type a skill (e.g. Java, Python, React, SQL, AWS)...");
@@ -71,21 +71,21 @@ public class RecruitmentView extends VBox {
         searchBox.getChildren().addAll(searchLabel, skillSearchField);
 
         VBox spinnerBox = new VBox(4);
-        Label spinnerLabel = new Label("Top K (Selection Sort):");
+        Label spinnerLabel = new Label("Top Candidates:");
         spinnerLabel.setStyle("-fx-font-size: 12px; -fx-font-weight: 700; -fx-text-fill: #5C4D3E;");
         topKSpinner.setPrefWidth(90);
         spinnerBox.getChildren().addAll(spinnerLabel, topKSpinner);
 
-        Button rankBtn = new Button("⚡ Rank via Selection Sort");
+        Button rankBtn = new Button("⚡ Rank Candidates");
         rankBtn.getStyleClass().add("btn-primary");
         rankBtn.setStyle("-fx-padding: 9 16;");
         rankBtn.setOnAction(e -> runSelectionSortRanking());
 
-        Button insertionBtn = new Button("Sort via Insertion Sort");
+        Button insertionBtn = new Button("Sort by Score");
         insertionBtn.getStyleClass().add("btn-secondary");
         insertionBtn.setOnAction(e -> runInsertionSort());
 
-        // Undo & Redo buttons (Stack)
+        // Undo & Redo buttons
         undoBtn.getStyleClass().add("btn-secondary");
         undoBtn.setOnAction(e -> handleUndo());
 
@@ -235,8 +235,8 @@ public class RecruitmentView extends VBox {
             }
         });
 
-        // Quick Action column pushing to Undo Stack
-        TableColumn<Candidate, Void> colAction = new TableColumn<>("Actions (Stack)");
+        // Quick Action column
+        TableColumn<Candidate, Void> colAction = new TableColumn<>("Actions");
         colAction.setCellFactory(col -> new TableCell<>() {
             private final Button btnShortlist = new Button("Shortlist");
             private final Button btnReject = new Button("Reject");
@@ -310,7 +310,7 @@ public class RecruitmentView extends VBox {
 
         HRAction peek = context.getCandidateService().getActionStack().peekUndo();
         if (peek != null) {
-            historyStatusLabel.setText("Top of Undo Stack: " + peek.getDescription());
+            historyStatusLabel.setText("Last action: " + peek.getDescription());
         }
     }
 

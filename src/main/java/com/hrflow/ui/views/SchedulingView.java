@@ -24,7 +24,7 @@ public class SchedulingView extends VBox {
     private final AppContext context = AppContext.getInstance();
     private final ObservableList<QueueInterviewScheduler.InterviewBooking> bookingData = FXCollections.observableArrayList();
     private final TableView<QueueInterviewScheduler.InterviewBooking> table = new TableView<>();
-    private final Label conflictStatusLabel = new Label("Availability Status: 0 Resource Overlaps across all slots");
+    private final Label conflictStatusLabel = new Label("✓ All interview slots verified — No scheduling conflicts");
     private final ComboBox<String> queueModeCombo = new ComboBox<>();
 
     public SchedulingView() {
@@ -40,9 +40,9 @@ public class SchedulingView extends VBox {
 
     private void buildHeader() {
         VBox titleBox = new VBox(4);
-        Label title = new Label("Queue-Based Interview Scheduling");
+        Label title = new Label("Interview Scheduling & Calendar");
         title.setStyle("-fx-font-size: 22px; -fx-font-weight: 800; -fx-text-fill: #261B12;");
-        Label subtitle = new Label("Processes interview requests via Queue / Priority Queue with fast slot and room availability checking.");
+        Label subtitle = new Label("Coordinate interview sessions with automatic room allocation and conflict-free interviewer scheduling.");
         subtitle.setStyle("-fx-font-size: 13px; -fx-text-fill: #786958;");
         titleBox.getChildren().addAll(title, subtitle);
         getChildren().add(titleBox);
@@ -54,19 +54,19 @@ public class SchedulingView extends VBox {
         bar.setAlignment(Pos.CENTER_LEFT);
 
         VBox queueModeBox = new VBox(4);
-        Label qLabel = new Label("Queue Processing Strategy:");
+        Label qLabel = new Label("Scheduling Order:");
         qLabel.setStyle("-fx-font-size: 12px; -fx-font-weight: 700; -fx-text-fill: #5C4D3E;");
-        queueModeCombo.getItems().addAll("Priority Queue (Score Order)", "FIFO Queue (Arrival Order)");
-        queueModeCombo.setValue("Priority Queue (Score Order)");
+        queueModeCombo.getItems().addAll("Top Fit Candidates First", "Chronological (Application Order)");
+        queueModeCombo.setValue("Top Fit Candidates First");
         queueModeBox.getChildren().addAll(qLabel, queueModeCombo);
 
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        Button regenerateBtn = new Button("⚡ Run Queue Scheduler");
+        Button regenerateBtn = new Button("⚡ Generate Schedule");
         regenerateBtn.getStyleClass().add("btn-primary");
         regenerateBtn.setOnAction(e -> {
-            boolean usePQ = queueModeCombo.getValue().contains("Priority");
+            boolean usePQ = queueModeCombo.getValue().contains("Top Fit");
             generateSchedule(usePQ);
         });
 
@@ -143,7 +143,7 @@ public class SchedulingView extends VBox {
                 top, context.getSchedulingService().getInterviewPanel(), LocalDate.now().plusDays(1), usePriorityQueue
         );
         bookingData.setAll(bookings);
-        conflictStatusLabel.setText(String.format("Availability Check: 0 Conflicts | %d sessions scheduled using %s",
-                bookings.size(), usePriorityQueue ? "Priority Queue" : "FIFO Queue"));
+        conflictStatusLabel.setText(String.format("✓ %d interview sessions scheduled without conflicts (%s)",
+                bookings.size(), usePriorityQueue ? "Top Fit First" : "Application Order"));
     }
 }
