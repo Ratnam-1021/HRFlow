@@ -6,7 +6,10 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
+import javafx.scene.shape.Rectangle;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -31,15 +34,19 @@ public class MainLayout extends BorderPane {
         navBar.getStyleClass().add("top-navbar");
         navBar.setAlignment(Pos.CENTER_LEFT);
 
-        // Logo icon box
-        HBox logoIcon = new HBox(2.5);
-        logoIcon.getStyleClass().add("logo-icon-box");
-        logoIcon.setAlignment(Pos.BOTTOM_CENTER);
-        logoIcon.setPrefSize(32, 32);
-        Region b1 = new Region(); b1.setPrefSize(3.5, 10); b1.setStyle("-fx-background-color: #EA580C; -fx-background-radius: 2;");
-        Region b2 = new Region(); b2.setPrefSize(3.5, 16); b2.setStyle("-fx-background-color: #EA580C; -fx-background-radius: 2;");
-        Region b3 = new Region(); b3.setPrefSize(3.5, 12); b3.setStyle("-fx-background-color: #EA580C; -fx-background-radius: 2;");
-        logoIcon.getChildren().addAll(b1, b2, b3);
+        // Real HRFlow Brand Icon
+        ImageView logoIcon = new ImageView();
+        try {
+            var is = getClass().getResourceAsStream("/com/hrflow/images/app_icon_orange.png");
+            if (is != null) {
+                Image img = new Image(is, 34, 34, true, true);
+                logoIcon.setImage(img);
+                Rectangle clip = new Rectangle(34, 34);
+                clip.setArcWidth(10);
+                clip.setArcHeight(10);
+                logoIcon.setClip(clip);
+            }
+        } catch (Exception ignored) {}
 
         // Brand on the left
         VBox brandBox = new VBox(0);
