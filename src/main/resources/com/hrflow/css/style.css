@@ -146,6 +146,40 @@
     -fx-text-fill: #1A110B;
 }
 
+.subtab-pill-container {
+    -fx-background-color: #F5EFE6;
+    -fx-background-radius: 24px;
+    -fx-padding: 3px;
+    -fx-border-color: #EADFD1;
+    -fx-border-radius: 24px;
+}
+
+.subtab-btn {
+    -fx-background-color: transparent;
+    -fx-text-fill: #786958;
+    -fx-font-size: 12.5px;
+    -fx-font-weight: 700;
+    -fx-padding: 6 16;
+    -fx-background-radius: 20px;
+    -fx-cursor: hand;
+}
+
+.subtab-btn:hover {
+    -fx-text-fill: #1A110B;
+    -fx-background-color: #ECE3D7;
+}
+
+.subtab-btn-active {
+    -fx-background-color: #FFFFFF;
+    -fx-text-fill: #EA580C;
+    -fx-font-size: 12.5px;
+    -fx-font-weight: 800;
+    -fx-padding: 6 16;
+    -fx-background-radius: 20px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(160, 95, 30, 0.12), 6, 0, 0, 2);
+}
+
 .skill-chip-tag {
     -fx-background-color: #F4EAE0;
     -fx-text-fill: #4A3B2C;

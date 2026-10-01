@@ -19,6 +19,10 @@ public class AppContext {
 
         this.candidateService = new CandidateService();
         this.schedulingService = new SchedulingService();
+
+        // Seed default initial interview sessions for recruitment pipeline
+        var topCandidates = candidateService.rankCandidates(java.util.Set.of("Java", "Spring Boot", "SQL"), 8);
+        this.schedulingService.autoSchedule(topCandidates, java.time.LocalDate.now().plusDays(1));
     }
 
     public static synchronized AppContext getInstance() {

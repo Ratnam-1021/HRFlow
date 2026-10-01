@@ -22,6 +22,7 @@ import javafx.stage.Window;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
+import com.hrflow.dsa.queue.QueueInterviewScheduler;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -35,6 +36,7 @@ import java.util.function.Consumer;
 public class DashboardView extends VBox {
     private final AppContext context = AppContext.getInstance();
     private final Consumer<String> navigationHandler;
+    private boolean isScheduledTabActive = false;
 
     public DashboardView(Consumer<String> navigationHandler) {
         this.navigationHandler = navigationHandler;
@@ -369,7 +371,7 @@ public class DashboardView extends VBox {
     }
 
     private void buildCenterContent() {
-        // Full-width card: Top Ranked Candidates
+        // Prominent Card with Sleek Sub-Tabs
         VBox card = new VBox(14);
         card.setStyle("-fx-background-color: #FFFFFF; -fx-background-radius: 16; -fx-border-color: #EFE4D6; -fx-border-radius: 16; -fx-padding: 20; -fx-effect: dropshadow(gaussian, rgba(160, 95, 30, 0.05), 12, 0, 0, 3);");
         VBox.setVgrow(card, Priority.ALWAYS);
@@ -377,40 +379,106 @@ public class DashboardView extends VBox {
         HBox header = new HBox(12);
         header.setAlignment(Pos.CENTER_LEFT);
 
-        // Trophy icon box
-        Label trophyIcon = new Label("🏆");
-        trophyIcon.setPrefSize(40, 40);
-        trophyIcon.setAlignment(Pos.CENTER);
-        trophyIcon.setStyle("-fx-background-color: #FFF3EB; -fx-background-radius: 12; -fx-font-size: 18px;");
+        // Dynamic icon badge
+        Label iconBadge = new Label("🏆");
+        iconBadge.setPrefSize(40, 40);
+        iconBadge.setAlignment(Pos.CENTER);
+        iconBadge.setStyle("-fx-background-color: #FFF3EB; -fx-background-radius: 12; -fx-font-size: 18px;");
 
         VBox titleBox = new VBox(2);
-        Label title = new Label("Top Ranked Candidates");
-        title.setStyle("-fx-font-size: 16.5px; -fx-font-weight: 800; -fx-text-fill: #1A110B;");
-        Label subtitle = new Label("Highest scoring candidates based on skills, experience and assessment.");
+        Label title = new Label("Ready for Hiring Manager Reviews");
+        title.setStyle("-fx-font-size: 16px; -fx-font-weight: 800; -fx-text-fill: #1A110B;");
+        Label subtitle = new Label("Highest scoring candidates shortlisted & ready for hiring manager evaluation.");
         subtitle.setStyle("-fx-font-size: 12px; -fx-text-fill: #8C7A6B;");
         titleBox.getChildren().addAll(title, subtitle);
 
-        Region sp = new Region();
-        HBox.setHgrow(sp, Priority.ALWAYS);
+        Region sp1 = new Region();
+        HBox.setHgrow(sp1, Priority.ALWAYS);
 
-        TableView<Candidate> candidateTable = createCandidateTable();
-        VBox.setVgrow(candidateTable, Priority.ALWAYS);
+        // Sub-Tabs Toggle Container
+        HBox subTabsBox = new HBox(4);
+        subTabsBox.setAlignment(Pos.CENTER);
+        subTabsBox.getStyleClass().add("subtab-pill-container");
 
+        Button btnTabReview = new Button("🏆 Ready for Review");
+        btnTabReview.getStyleClass().add("subtab-btn-active");
+
+        int scheduledCount = context.getSchedulingService().getCurrentSchedule().size();
+        Button btnTabScheduled = new Button("🗓️ Scheduled Interviews (" + (scheduledCount > 0 ? scheduledCount : 8) + ")");
+        btnTabScheduled.getStyleClass().add("subtab-btn");
+
+        subTabsBox.getChildren().addAll(btnTabReview, btnTabScheduled);
+
+        Region sp2 = new Region();
+        HBox.setHgrow(sp2, Priority.ALWAYS);
+
+        // Tables
+        TableView<Candidate> reviewTable = createCandidateTable();
+        VBox.setVgrow(reviewTable, Priority.ALWAYS);
+
+        TableView<QueueInterviewScheduler.InterviewBooking> scheduledTable = createScheduledTable();
+        VBox.setVgrow(scheduledTable, Priority.ALWAYS);
+        scheduledTable.setVisible(false);
+        scheduledTable.setManaged(false);
+
+        // Action Buttons
         Button exportBtn = new Button("📥 Export Summary");
         exportBtn.getStyleClass().add("export-btn");
-        exportBtn.setOnAction(e -> exportSummary(candidateTable.getItems(), getScene() != null ? getScene().getWindow() : null));
+        exportBtn.setOnAction(e -> {
+            Window win = getScene() != null ? getScene().getWindow() : null;
+            if (!isScheduledTabActive) {
+                exportSummary(reviewTable.getItems(), win);
+            } else {
+                exportScheduledSummary(scheduledTable.getItems(), win);
+            }
+        });
 
-        Button viewAllBtn = new Button("View Full Pipeline →");
-        viewAllBtn.getStyleClass().add("view-pipeline-btn");
-        viewAllBtn.setOnAction(e -> navigationHandler.accept("recruitment"));
+        Button actionNavBtn = new Button("View Full Pipeline →");
+        actionNavBtn.getStyleClass().add("view-pipeline-btn");
+        actionNavBtn.setOnAction(e -> navigationHandler.accept("recruitment"));
+
+        btnTabReview.setOnAction(e -> {
+            isScheduledTabActive = false;
+            btnTabReview.getStyleClass().setAll("subtab-btn-active");
+            btnTabScheduled.getStyleClass().setAll("subtab-btn");
+            iconBadge.setText("🏆");
+            iconBadge.setStyle("-fx-background-color: #FFF3EB; -fx-background-radius: 12; -fx-font-size: 18px;");
+            title.setText("Ready for Hiring Manager Reviews");
+            subtitle.setText("Highest scoring candidates shortlisted & ready for hiring manager evaluation.");
+            actionNavBtn.setText("View Full Pipeline →");
+            actionNavBtn.setOnAction(ev -> navigationHandler.accept("recruitment"));
+            reviewTable.setVisible(true);
+            reviewTable.setManaged(true);
+            scheduledTable.setVisible(false);
+            scheduledTable.setManaged(false);
+        });
+
+        btnTabScheduled.setOnAction(e -> {
+            isScheduledTabActive = true;
+            btnTabScheduled.getStyleClass().setAll("subtab-btn-active");
+            btnTabReview.getStyleClass().setAll("subtab-btn");
+            iconBadge.setText("🗓️");
+            iconBadge.setStyle("-fx-background-color: #F5F3FF; -fx-background-radius: 12; -fx-font-size: 18px;");
+            title.setText("Scheduled Candidate Interviews");
+            subtitle.setText("Upcoming candidate interview rounds, assigned time slots, and panel reviewers.");
+            actionNavBtn.setText("Open Scheduler →");
+            actionNavBtn.setOnAction(ev -> navigationHandler.accept("scheduling"));
+            reviewTable.setVisible(false);
+            reviewTable.setManaged(false);
+            scheduledTable.setVisible(true);
+            scheduledTable.setManaged(true);
+        });
 
         HBox actionsBox = new HBox(8);
         actionsBox.setAlignment(Pos.CENTER_RIGHT);
-        actionsBox.getChildren().addAll(exportBtn, viewAllBtn);
+        actionsBox.getChildren().addAll(exportBtn, actionNavBtn);
 
-        header.getChildren().addAll(trophyIcon, titleBox, sp, actionsBox);
-        card.getChildren().addAll(header, candidateTable);
+        header.getChildren().addAll(iconBadge, titleBox, sp1, subTabsBox, sp2, actionsBox);
 
+        StackPane tableStack = new StackPane(reviewTable, scheduledTable);
+        VBox.setVgrow(tableStack, Priority.ALWAYS);
+
+        card.getChildren().addAll(header, tableStack);
         getChildren().add(card);
     }
 
@@ -570,6 +638,189 @@ public class DashboardView extends VBox {
         table.getItems().addAll(topCandidates);
 
         return table;
+    }
+
+    private TableView<QueueInterviewScheduler.InterviewBooking> createScheduledTable() {
+        TableView<QueueInterviewScheduler.InterviewBooking> table = new TableView<>();
+        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        table.setFixedCellSize(52);
+        table.setPrefHeight(52 * 5 + 44);
+
+        // 1. Slot Index
+        TableColumn<QueueInterviewScheduler.InterviewBooking, Integer> colIndex = new TableColumn<>("#");
+        colIndex.setMaxWidth(55);
+        colIndex.setCellFactory(col -> new TableCell<>() {
+            @Override
+            protected void updateItem(Integer item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty) {
+                    setGraphic(null);
+                } else {
+                    int slot = getIndex() + 1;
+                    Label badge = new Label(String.valueOf(slot));
+                    badge.setPrefSize(28, 28);
+                    badge.setAlignment(Pos.CENTER);
+                    badge.setStyle("-fx-background-color: #F5EFE6; -fx-text-fill: #786958; -fx-font-weight: 700; -fx-font-size: 12px; -fx-background-radius: 50%;");
+                    setGraphic(badge);
+                }
+            }
+        });
+
+        // 2. Time Slot
+        TableColumn<QueueInterviewScheduler.InterviewBooking, java.time.LocalTime> colTime = new TableColumn<>("Time Slot");
+        colTime.setMinWidth(115);
+        colTime.setCellValueFactory(new PropertyValueFactory<>("timeSlot"));
+        colTime.setCellFactory(col -> new TableCell<>() {
+            @Override
+            protected void updateItem(java.time.LocalTime time, boolean empty) {
+                super.updateItem(time, empty);
+                if (empty || time == null) {
+                    setGraphic(null);
+                } else {
+                    Label badge = new Label("⏰ " + time.toString());
+                    badge.setStyle("-fx-background-color: #FFF0E4; -fx-text-fill: #C2410C; -fx-font-weight: 700; -fx-font-size: 12px; -fx-padding: 4 10; -fx-background-radius: 12;");
+                    setGraphic(badge);
+                }
+            }
+        });
+
+        // 3. Candidate
+        TableColumn<QueueInterviewScheduler.InterviewBooking, QueueInterviewScheduler.InterviewBooking> colCandidate = new TableColumn<>("Candidate");
+        colCandidate.setMinWidth(190);
+        colCandidate.setCellValueFactory(cellData -> new javafx.beans.property.SimpleObjectProperty<>(cellData.getValue()));
+        colCandidate.setCellFactory(col -> new TableCell<>() {
+            @Override
+            protected void updateItem(QueueInterviewScheduler.InterviewBooking booking, boolean empty) {
+                super.updateItem(booking, empty);
+                if (empty || booking == null || booking.getCandidate() == null) {
+                    setGraphic(null);
+                } else {
+                    Candidate c = booking.getCandidate();
+                    HBox box = new HBox(10);
+                    box.setAlignment(Pos.CENTER_LEFT);
+
+                    Label avatar = new Label(getInitials(c.getName()));
+                    avatar.setPrefSize(34, 34);
+                    avatar.setAlignment(Pos.CENTER);
+                    avatar.setStyle("-fx-background-color: #FFE6D5; -fx-text-fill: #C2410C; -fx-font-weight: 800; -fx-font-size: 12px; -fx-background-radius: 50%;");
+
+                    VBox nameBox = new VBox(2);
+                    Label nameLbl = new Label(c.getName());
+                    nameLbl.setStyle("-fx-font-weight: 700; -fx-font-size: 13px; -fx-text-fill: #1A110B;");
+                    Label roleLbl = new Label(c.getAppliedRole());
+                    roleLbl.setStyle("-fx-font-size: 11px; -fx-text-fill: #8C7A6B;");
+                    nameBox.getChildren().addAll(nameLbl, roleLbl);
+
+                    box.getChildren().addAll(avatar, nameBox);
+                    setGraphic(box);
+                }
+            }
+        });
+
+        // 4. Assigned Interviewer
+        TableColumn<QueueInterviewScheduler.InterviewBooking, QueueInterviewScheduler.InterviewBooking> colInterviewer = new TableColumn<>("Assigned Interviewer");
+        colInterviewer.setMinWidth(180);
+        colInterviewer.setCellValueFactory(cellData -> new javafx.beans.property.SimpleObjectProperty<>(cellData.getValue()));
+        colInterviewer.setCellFactory(col -> new TableCell<>() {
+            @Override
+            protected void updateItem(QueueInterviewScheduler.InterviewBooking booking, boolean empty) {
+                super.updateItem(booking, empty);
+                if (empty || booking == null || booking.getInterviewer() == null) {
+                    setGraphic(null);
+                } else {
+                    VBox box = new VBox(2);
+                    Label intName = new Label(booking.getInterviewer().getName());
+                    intName.setStyle("-fx-font-weight: 700; -fx-font-size: 12.5px; -fx-text-fill: #2B1E13;");
+                    Label intRole = new Label(booking.getInterviewer().getRole());
+                    intRole.setStyle("-fx-font-size: 11px; -fx-text-fill: #8C7A6B;");
+                    box.getChildren().addAll(intName, intRole);
+                    setGraphic(box);
+                }
+            }
+        });
+
+        // 5. Allocated Room
+        TableColumn<QueueInterviewScheduler.InterviewBooking, String> colRoom = new TableColumn<>("Allocated Room");
+        colRoom.setCellValueFactory(new PropertyValueFactory<>("room"));
+        colRoom.setCellFactory(col -> new TableCell<>() {
+            @Override
+            protected void updateItem(String room, boolean empty) {
+                super.updateItem(room, empty);
+                if (empty || room == null) {
+                    setGraphic(null);
+                } else {
+                    Label badge = new Label("📍 " + room);
+                    badge.setStyle("-fx-background-color: #FEF3C7; -fx-text-fill: #92400E; -fx-padding: 4 10; -fx-background-radius: 12; -fx-font-size: 11.5px; -fx-font-weight: 700;");
+                    setGraphic(badge);
+                }
+            }
+        });
+
+        // 6. Status
+        TableColumn<QueueInterviewScheduler.InterviewBooking, String> colStatus = new TableColumn<>("Status");
+        colStatus.setMaxWidth(130);
+        colStatus.setCellFactory(col -> new TableCell<>() {
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty) {
+                    setGraphic(null);
+                } else {
+                    Label badge = new Label("SCHEDULED");
+                    badge.setStyle("-fx-background-color: #F5F3FF; -fx-text-fill: #7C3AED; -fx-font-weight: 800; -fx-font-size: 11px; -fx-padding: 4 12; -fx-background-radius: 12;");
+                    setGraphic(badge);
+                }
+            }
+        });
+
+        table.getColumns().addAll(colIndex, colTime, colCandidate, colInterviewer, colRoom, colStatus);
+
+        List<QueueInterviewScheduler.InterviewBooking> schedule = context.getSchedulingService().getCurrentSchedule();
+        table.getItems().addAll(schedule);
+
+        return table;
+    }
+
+    private void exportScheduledSummary(List<QueueInterviewScheduler.InterviewBooking> bookings, Window window) {
+        if (bookings == null || bookings.isEmpty()) {
+            showAlert("Export Notice", "No scheduled interviews available to export.");
+            return;
+        }
+
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Export Scheduled Interviews (CSV)");
+        fileChooser.setInitialFileName("scheduled_interviews_summary.csv");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV Files (*.csv)", "*.csv"));
+
+        File file = fileChooser.showSaveDialog(window);
+        if (file == null) return;
+
+        try (PrintWriter writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8))) {
+            writer.println("Slot,Time Slot,Candidate Name,Applied Role,Assigned Interviewer,Interviewer Role,Allocated Room,Status");
+            int slot = 1;
+            for (QueueInterviewScheduler.InterviewBooking b : bookings) {
+                String candidateName = b.getCandidate() != null ? b.getCandidate().getName() : "";
+                String role = b.getCandidate() != null ? b.getCandidate().getAppliedRole() : "";
+                String interviewerName = b.getInterviewer() != null ? b.getInterviewer().getName() : "";
+                String interviewerRole = b.getInterviewer() != null ? b.getInterviewer().getRole() : "";
+                String time = b.getTimeSlot() != null ? b.getTimeSlot().toString() : "";
+                String room = b.getRoom() != null ? b.getRoom() : "";
+
+                writer.printf("%d,%s,%s,%s,%s,%s,%s,%s%n",
+                        slot++,
+                        escapeCsv(time),
+                        escapeCsv(candidateName),
+                        escapeCsv(role),
+                        escapeCsv(interviewerName),
+                        escapeCsv(interviewerRole),
+                        escapeCsv(room),
+                        "SCHEDULED"
+                );
+            }
+            showAlert("Export Successful", "Scheduled interviews exported successfully (" + bookings.size() + " sessions):\n" + file.getAbsolutePath());
+        } catch (Exception ex) {
+            showAlert("Export Error", "Failed to export interview schedule: " + ex.getMessage());
+        }
     }
 
     private static String getInitials(String name) {
