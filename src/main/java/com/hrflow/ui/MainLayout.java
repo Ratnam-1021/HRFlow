@@ -53,16 +53,7 @@ public class MainLayout extends BorderPane {
         Region spacer = new Region();
         VBox.setVgrow(spacer, Priority.ALWAYS);
 
-        // Footer status card
-        VBox engineInfo = new VBox(4);
-        engineInfo.setStyle("-fx-background-color: #FAF5ED; -fx-padding: 12; -fx-background-radius: 8; -fx-border-color: #EFE4D6; -fx-border-radius: 8;");
-        Label eTitle = new Label("System Status");
-        eTitle.setStyle("-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #EA580C;");
-        Label eDesc = new Label("• Pipeline Active\n• Scheduler Ready\n• Audit Logging Enabled");
-        eDesc.setStyle("-fx-font-size: 10.5px; -fx-text-fill: #5C4D3E;");
-        engineInfo.getChildren().addAll(eTitle, eDesc);
-
-        sidebar.getChildren().addAll(brandBox, navList, spacer, engineInfo);
+        sidebar.getChildren().addAll(brandBox, navList, spacer);
         return sidebar;
     }
 
