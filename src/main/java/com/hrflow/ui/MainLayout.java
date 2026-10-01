@@ -18,95 +18,67 @@ public class MainLayout extends BorderPane {
     private final StackPane contentArea = new StackPane();
     private final Map<String, Node> viewCache = new HashMap<>();
     private final Map<String, Button> navButtons = new HashMap<>();
-    private final Label topTitle = new Label("Recruitment & Hiring Overview");
 
     public MainLayout() {
-        setLeft(buildSidebar());
-        setTop(buildTopBar());
+        setTop(buildTopNavBar());
         setCenter(contentArea);
 
         switchView("dashboard");
     }
 
-    private VBox buildSidebar() {
-        VBox sidebar = new VBox(12);
-        sidebar.getStyleClass().add("sidebar");
-        sidebar.setPrefWidth(260);
-        sidebar.setPadding(new Insets(20, 14, 20, 14));
+    private HBox buildTopNavBar() {
+        HBox navBar = new HBox(20);
+        navBar.getStyleClass().add("top-navbar");
+        navBar.setAlignment(Pos.CENTER_LEFT);
 
-        // Brand
-        VBox brandBox = new VBox(2);
-        brandBox.setPadding(new Insets(0, 0, 16, 8));
+        // Brand on the left
+        VBox brandBox = new VBox(1);
+        brandBox.setAlignment(Pos.CENTER_LEFT);
         Label logo = new Label("HRFlow");
         logo.getStyleClass().add("logo-text");
-        Label sub = new Label("RECRUITMENT & HIRING SUBSYSTEM");
+        Label sub = new Label("RECRUITMENT & HIRING");
         sub.getStyleClass().add("logo-subtext");
         brandBox.getChildren().addAll(logo, sub);
 
-        // Navigation strictly for Recruitment & Hiring
-        VBox navList = new VBox(6);
-        addNavItem(navList, "dashboard", "📊  Dashboard");
-        addNavItem(navList, "recruitment", "👥  Candidate Pipeline");
-        addNavItem(navList, "scheduling", "🗓️  Interview Scheduler");
-        addNavItem(navList, "history", "📜  Activity & Audit Log");
+        // Vertical divider
+        javafx.scene.control.Separator sep = new javafx.scene.control.Separator(javafx.geometry.Orientation.VERTICAL);
+        sep.setPrefHeight(26);
+        sep.setStyle("-fx-background-color: #EFE4D6;");
+
+        // Horizontal navigation tabs with rounded rectangle cards
+        HBox navButtonsBox = new HBox(10);
+        navButtonsBox.setAlignment(Pos.CENTER_LEFT);
+        addNavItem(navButtonsBox, "dashboard", "📊  Dashboard");
+        addNavItem(navButtonsBox, "recruitment", "👥  Candidate Pipeline");
+        addNavItem(navButtonsBox, "scheduling", "🗓️  Interview Scheduler");
+        addNavItem(navButtonsBox, "history", "📜  Activity & Audit Log");
 
         Region spacer = new Region();
-        VBox.setVgrow(spacer, Priority.ALWAYS);
+        HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        sidebar.getChildren().addAll(brandBox, navList, spacer);
-        return sidebar;
+        navBar.getChildren().addAll(brandBox, sep, navButtonsBox, spacer);
+        return navBar;
     }
 
-    private void addNavItem(VBox container, String key, String label) {
+    private void addNavItem(HBox container, String key, String label) {
         Button btn = new Button(label);
-        btn.setMaxWidth(Double.MAX_VALUE);
-        btn.getStyleClass().add("nav-button");
+        btn.getStyleClass().add("nav-card-button");
         btn.setOnAction(e -> switchView(key));
         navButtons.put(key, btn);
         container.getChildren().add(btn);
     }
 
-    private HBox buildTopBar() {
-        HBox topBar = new HBox(16);
-        topBar.getStyleClass().add("top-header");
-        topBar.setAlignment(Pos.CENTER_LEFT);
-
-        topTitle.getStyleClass().add("header-title");
-
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
-
-        HBox liveIndicator = new HBox(6);
-        liveIndicator.setAlignment(Pos.CENTER);
-        Label dot = new Label("●");
-        dot.setStyle("-fx-text-fill: #15803D; -fx-font-size: 10px;");
-        Label status = new Label("Recruitment Pipeline Online");
-        status.setStyle("-fx-text-fill: #5C4D3E; -fx-font-size: 12px; -fx-font-weight: 600;");
-        liveIndicator.getChildren().addAll(dot, status);
-
-        topBar.getChildren().addAll(topTitle, spacer, liveIndicator);
-        return topBar;
-    }
-
     public void switchView(String key) {
-        navButtons.values().forEach(b -> b.getStyleClass().remove("nav-button-active"));
+        navButtons.values().forEach(b -> b.getStyleClass().remove("nav-card-button-active"));
         Button activeBtn = navButtons.get(key);
         if (activeBtn != null) {
-            activeBtn.getStyleClass().add("nav-button-active");
+            activeBtn.getStyleClass().add("nav-card-button-active");
         }
 
         Node view = viewCache.computeIfAbsent(key, this::createViewInstance);
 
-        switch (key) {
-            case "dashboard" -> topTitle.setText("Recruitment Overview & Pipeline Metrics");
-            case "recruitment" -> topTitle.setText("Candidate Sourcing & Screening");
-            case "scheduling" -> topTitle.setText("Interview Scheduling & Calendar");
-            case "history" -> {
-                topTitle.setText("Activity History & Audit Trail");
-                if (view instanceof HistoryView hv) {
-                    hv.refreshHistory();
-                }
-            }
+        if (key.equals("history") && view instanceof HistoryView hv) {
+            hv.refreshHistory();
         }
 
         contentArea.getChildren().setAll(view);
