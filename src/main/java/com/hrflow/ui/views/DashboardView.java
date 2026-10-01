@@ -402,7 +402,12 @@ public class DashboardView extends VBox {
         subTabsBox.setAlignment(Pos.CENTER);
         subTabsBox.getStyleClass().add("subtab-pill-container");
 
-        Button btnTabReview = new Button("🏆 Ready for Review");
+        long shortlistedCount = context.getCandidateService().getAllCandidates().stream()
+                .filter(c -> c.getStatus() == Candidate.CandidateStatus.SHORTLISTED)
+                .count();
+        int readyCount = (int) (shortlistedCount > 0 ? shortlistedCount : 22);
+
+        Button btnTabReview = new Button("🏆 Ready for Review (" + readyCount + ")");
         btnTabReview.getStyleClass().add("subtab-btn-active");
 
         int scheduledCount = context.getSchedulingService().getCurrentSchedule().size();
@@ -615,24 +620,7 @@ public class DashboardView extends VBox {
             }
         });
 
-        // 7. Status Column (Green Shortlisted Capsule)
-        TableColumn<Candidate, Candidate.CandidateStatus> colStatus = new TableColumn<>("Status");
-        colStatus.setCellValueFactory(new PropertyValueFactory<>("status"));
-        colStatus.setCellFactory(col -> new TableCell<>() {
-            @Override
-            protected void updateItem(Candidate.CandidateStatus status, boolean empty) {
-                super.updateItem(status, empty);
-                if (empty || status == null) {
-                    setGraphic(null);
-                } else {
-                    Label badge = new Label("SHORTLISTED");
-                    badge.setStyle("-fx-background-color: #DCFCE7; -fx-text-fill: #15803D; -fx-font-weight: 800; -fx-font-size: 11px; -fx-padding: 4 12; -fx-background-radius: 12;");
-                    setGraphic(badge);
-                }
-            }
-        });
-
-        table.getColumns().addAll(colRank, colCandidate, colRole, colExp, colSkills, colScore, colStatus);
+        table.getColumns().addAll(colRank, colCandidate, colRole, colExp, colSkills, colScore);
 
         List<Candidate> shortlistedCandidates = context.getCandidateService().getAllCandidates().stream()
                 .filter(c -> c.getStatus() == Candidate.CandidateStatus.SHORTLISTED)
@@ -752,41 +740,7 @@ public class DashboardView extends VBox {
             }
         });
 
-        // 5. Allocated Room
-        TableColumn<QueueInterviewScheduler.InterviewBooking, String> colRoom = new TableColumn<>("Allocated Room");
-        colRoom.setCellValueFactory(new PropertyValueFactory<>("room"));
-        colRoom.setCellFactory(col -> new TableCell<>() {
-            @Override
-            protected void updateItem(String room, boolean empty) {
-                super.updateItem(room, empty);
-                if (empty || room == null) {
-                    setGraphic(null);
-                } else {
-                    Label badge = new Label("📍 " + room);
-                    badge.setStyle("-fx-background-color: #FEF3C7; -fx-text-fill: #92400E; -fx-padding: 4 10; -fx-background-radius: 12; -fx-font-size: 11.5px; -fx-font-weight: 700;");
-                    setGraphic(badge);
-                }
-            }
-        });
-
-        // 6. Status
-        TableColumn<QueueInterviewScheduler.InterviewBooking, String> colStatus = new TableColumn<>("Status");
-        colStatus.setMaxWidth(130);
-        colStatus.setCellFactory(col -> new TableCell<>() {
-            @Override
-            protected void updateItem(String item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty) {
-                    setGraphic(null);
-                } else {
-                    Label badge = new Label("SCHEDULED");
-                    badge.setStyle("-fx-background-color: #F5F3FF; -fx-text-fill: #7C3AED; -fx-font-weight: 800; -fx-font-size: 11px; -fx-padding: 4 12; -fx-background-radius: 12;");
-                    setGraphic(badge);
-                }
-            }
-        });
-
-        table.getColumns().addAll(colIndex, colTime, colCandidate, colInterviewer, colRoom, colStatus);
+        table.getColumns().addAll(colIndex, colTime, colCandidate, colInterviewer);
 
         List<QueueInterviewScheduler.InterviewBooking> schedule = context.getSchedulingService().getCurrentSchedule();
         table.getItems().addAll(schedule);

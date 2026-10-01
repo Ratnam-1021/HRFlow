@@ -48,14 +48,14 @@ public class ReportExportService {
         PdfWriter.getInstance(document, new FileOutputStream(file));
         document.open();
 
-        PdfPTable table = new PdfPTable(6);
+        PdfPTable table = new PdfPTable(5);
         table.setWidthPercentage(100);
-        table.setWidths(new float[]{ 8f, 23f, 25f, 15f, 14f, 20f });
+        table.setWidths(new float[]{ 10f, 30f, 30f, 15f, 15f });
 
         // 1. Top Header Banner
         Font fontTitle = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 13, Color.WHITE);
         PdfPCell headerCell = new PdfPCell(new Phrase(title.toUpperCase(), fontTitle));
-        headerCell.setColspan(6);
+        headerCell.setColspan(5);
         headerCell.setBackgroundColor(COLOR_NAVY);
         headerCell.setHorizontalAlignment(Element.ALIGN_CENTER);
         headerCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
@@ -68,7 +68,7 @@ public class ReportExportService {
         String purposeDisplay = purpose.startsWith("Purpose:") ? purpose : "Purpose: " + purpose;
         Font fontPurpose = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 9.5f, new Color(0x1E, 0x29, 0x3B));
         PdfPCell purposeCell = new PdfPCell(new Phrase(purposeDisplay, fontPurpose));
-        purposeCell.setColspan(6);
+        purposeCell.setColspan(5);
         purposeCell.setBackgroundColor(COLOR_ICE_BLUE);
         purposeCell.setHorizontalAlignment(Element.ALIGN_CENTER);
         purposeCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
@@ -88,7 +88,7 @@ public class ReportExportService {
         table.addCell(metaLeft);
 
         PdfPCell metaRight = new PdfPCell(new Phrase("Total Candidates: " + candidates.size(), fontMeta));
-        metaRight.setColspan(3);
+        metaRight.setColspan(2);
         metaRight.setBackgroundColor(Color.WHITE);
         metaRight.setHorizontalAlignment(Element.ALIGN_RIGHT);
         metaRight.setPadding(6f);
@@ -98,7 +98,7 @@ public class ReportExportService {
         // 4. Section Title: RANKED CANDIDATES
         Font fontSection = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 9f, COLOR_NAVY);
         PdfPCell sectionCell = new PdfPCell(new Phrase("RANKED CANDIDATES", fontSection));
-        sectionCell.setColspan(6);
+        sectionCell.setColspan(5);
         sectionCell.setBackgroundColor(COLOR_SECTION_BG);
         sectionCell.setHorizontalAlignment(Element.ALIGN_CENTER);
         sectionCell.setPadding(6f);
@@ -106,7 +106,7 @@ public class ReportExportService {
         table.addCell(sectionCell);
 
         // 5. Table Header Row
-        String[] headers = { "Rank", "Candidate Name", "Applied Role", "Experience (Years)", "Overall Score (%)", "Status" };
+        String[] headers = { "Rank", "Candidate Name", "Applied Role", "Experience (Years)", "Overall Score (%)" };
         Font fontColHeader = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 9f, Color.WHITE);
         for (String h : headers) {
             PdfPCell c = new PdfPCell(new Phrase(h, fontColHeader));
@@ -123,30 +123,20 @@ public class ReportExportService {
         Font fontName = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 9.5f, COLOR_TEXT_DARK);
         Font fontRegular = FontFactory.getFont(FontFactory.HELVETICA, 9f, COLOR_TEXT_DARK);
         Font fontScore = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 9.5f, COLOR_SCORE_BLUE);
-        Font fontStatus = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 8.5f, COLOR_STATUS_TEXT);
 
         int rank = 1;
         for (Candidate c : candidates) {
-            String statusText = "INTERVIEW SCHEDULED";
-            if (c.getStatus() == Candidate.CandidateStatus.SHORTLISTED) {
-                statusText = "SHORTLISTED";
-            } else if (c.getStatus() != null) {
-                statusText = c.getStatus().name().replace('_', ' ');
-            }
-
             PdfPCell cellRank = createCell(String.valueOf(rank++), fontRank, Element.ALIGN_CENTER, Color.WHITE);
             PdfPCell cellName = createCell(c.getName(), fontName, Element.ALIGN_CENTER, Color.WHITE);
             PdfPCell cellRole = createCell(c.getAppliedRole(), fontRegular, Element.ALIGN_CENTER, Color.WHITE);
             PdfPCell cellExp = createCell(String.format("%.1f", c.getExperienceYears()), fontRegular, Element.ALIGN_CENTER, Color.WHITE);
             PdfPCell cellScore = createCell(String.format("%.1f%%", c.getOverallScore()), fontScore, Element.ALIGN_CENTER, Color.WHITE);
-            PdfPCell cellStatus = createCell(statusText, fontStatus, Element.ALIGN_CENTER, COLOR_STATUS_BG);
 
             table.addCell(cellRank);
             table.addCell(cellName);
             table.addCell(cellRole);
             table.addCell(cellExp);
             table.addCell(cellScore);
-            table.addCell(cellStatus);
         }
 
         document.add(table);
@@ -163,14 +153,14 @@ public class ReportExportService {
         PdfWriter.getInstance(document, new FileOutputStream(file));
         document.open();
 
-        PdfPTable table = new PdfPTable(7);
+        PdfPTable table = new PdfPTable(5);
         table.setWidthPercentage(100);
-        table.setWidths(new float[]{ 7f, 13f, 21f, 18f, 20f, 14f, 17f });
+        table.setWidths(new float[]{ 8f, 18f, 26f, 24f, 24f });
 
         // 1. Top Header Banner
         Font fontTitle = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 13, Color.WHITE);
         PdfPCell headerCell = new PdfPCell(new Phrase(title.toUpperCase(), fontTitle));
-        headerCell.setColspan(7);
+        headerCell.setColspan(5);
         headerCell.setBackgroundColor(COLOR_NAVY);
         headerCell.setHorizontalAlignment(Element.ALIGN_CENTER);
         headerCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
@@ -183,7 +173,7 @@ public class ReportExportService {
         String purposeDisplay = purpose.startsWith("Purpose:") ? purpose : "Purpose: " + purpose;
         Font fontPurpose = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 9.5f, new Color(0x1E, 0x29, 0x3B));
         PdfPCell purposeCell = new PdfPCell(new Phrase(purposeDisplay, fontPurpose));
-        purposeCell.setColspan(7);
+        purposeCell.setColspan(5);
         purposeCell.setBackgroundColor(COLOR_ICE_BLUE);
         purposeCell.setHorizontalAlignment(Element.ALIGN_CENTER);
         purposeCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
@@ -195,7 +185,7 @@ public class ReportExportService {
         // 3. Metadata Row
         Font fontMeta = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 8.5f, COLOR_TEXT_MUTED);
         PdfPCell metaLeft = new PdfPCell(new Phrase("Generated: " + timestamp, fontMeta));
-        metaLeft.setColspan(4);
+        metaLeft.setColspan(3);
         metaLeft.setBackgroundColor(Color.WHITE);
         metaLeft.setHorizontalAlignment(Element.ALIGN_LEFT);
         metaLeft.setPadding(6f);
@@ -203,7 +193,7 @@ public class ReportExportService {
         table.addCell(metaLeft);
 
         PdfPCell metaRight = new PdfPCell(new Phrase("Total Scheduled Sessions: " + bookings.size(), fontMeta));
-        metaRight.setColspan(3);
+        metaRight.setColspan(2);
         metaRight.setBackgroundColor(Color.WHITE);
         metaRight.setHorizontalAlignment(Element.ALIGN_RIGHT);
         metaRight.setPadding(6f);
@@ -213,7 +203,7 @@ public class ReportExportService {
         // 4. Section Title: SCHEDULED CANDIDATES
         Font fontSection = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 9f, COLOR_NAVY);
         PdfPCell sectionCell = new PdfPCell(new Phrase("SCHEDULED CANDIDATES", fontSection));
-        sectionCell.setColspan(7);
+        sectionCell.setColspan(5);
         sectionCell.setBackgroundColor(COLOR_SECTION_BG);
         sectionCell.setHorizontalAlignment(Element.ALIGN_CENTER);
         sectionCell.setPadding(6f);
@@ -221,7 +211,7 @@ public class ReportExportService {
         table.addCell(sectionCell);
 
         // 5. Table Header Row
-        String[] headers = { "Slot", "Time Slot", "Candidate Name", "Applied Role", "Assigned Interviewer", "Allocated Room", "Status" };
+        String[] headers = { "Slot", "Time Slot", "Candidate Name", "Applied Role", "Assigned Interviewer" };
         Font fontColHeader = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 9f, Color.WHITE);
         for (String h : headers) {
             PdfPCell c = new PdfPCell(new Phrase(h, fontColHeader));
@@ -238,8 +228,6 @@ public class ReportExportService {
         Font fontTime = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 9f, COLOR_TIME_ORANGE);
         Font fontName = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 9f, COLOR_TEXT_DARK);
         Font fontRegular = FontFactory.getFont(FontFactory.HELVETICA, 8.5f, COLOR_TEXT_DARK);
-        Font fontRoom = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 8.5f, COLOR_ROOM_GOLD);
-        Font fontStatus = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 8.5f, COLOR_STATUS_TEXT);
 
         int slot = 1;
         for (QueueInterviewScheduler.InterviewBooking b : bookings) {
@@ -247,15 +235,12 @@ public class ReportExportService {
             String role = b.getCandidate() != null ? b.getCandidate().getAppliedRole() : "";
             String interviewerInfo = b.getInterviewer() != null ? (b.getInterviewer().getName() + " (" + b.getInterviewer().getRole() + ")") : "";
             String time = b.getTimeSlot() != null ? b.getTimeSlot().toString() : "";
-            String room = b.getRoom() != null ? b.getRoom() : "";
 
             table.addCell(createCell(String.valueOf(slot++), fontSlot, Element.ALIGN_CENTER, Color.WHITE));
             table.addCell(createCell(time, fontTime, Element.ALIGN_CENTER, Color.WHITE));
             table.addCell(createCell(candidateName, fontName, Element.ALIGN_CENTER, Color.WHITE));
             table.addCell(createCell(role, fontRegular, Element.ALIGN_CENTER, Color.WHITE));
             table.addCell(createCell(interviewerInfo, fontRegular, Element.ALIGN_CENTER, Color.WHITE));
-            table.addCell(createCell(room, fontRoom, Element.ALIGN_CENTER, Color.WHITE));
-            table.addCell(createCell("INTERVIEW SCHEDULED", fontStatus, Element.ALIGN_CENTER, COLOR_STATUS_BG));
         }
 
         document.add(table);
@@ -281,17 +266,16 @@ public class ReportExportService {
             writer.println("# Purpose: " + purpose);
             writer.println("# Generated: " + LocalDateTime.now().format(DATE_FORMATTER));
             writer.println("# Total Candidates: " + (candidates != null ? candidates.size() : 0));
-            writer.println("Rank,Candidate Name,Applied Role,Experience (Years),Overall Score (%),Status");
+            writer.println("Rank,Candidate Name,Applied Role,Experience (Years),Overall Score (%)");
             if (candidates != null) {
                 int rank = 1;
                 for (Candidate c : candidates) {
-                    writer.printf("%d,%s,%s,%.1f,%.1f%%,%s%n",
+                    writer.printf("%d,%s,%s,%.1f,%.1f%%%n",
                             rank++,
                             escapeCsv(c.getName()),
                             escapeCsv(c.getAppliedRole()),
                             c.getExperienceYears(),
-                            c.getOverallScore(),
-                            c.getStatus() != null ? c.getStatus().name() : "");
+                            c.getOverallScore());
                 }
             }
         }
@@ -303,18 +287,16 @@ public class ReportExportService {
             writer.println("# Purpose: " + purpose);
             writer.println("# Generated: " + LocalDateTime.now().format(DATE_FORMATTER));
             writer.println("# Total Scheduled Sessions: " + (bookings != null ? bookings.size() : 0));
-            writer.println("Slot,Time Slot,Candidate Name,Applied Role,Assigned Interviewer,Allocated Room,Status");
+            writer.println("Slot,Time Slot,Candidate Name,Applied Role,Assigned Interviewer");
             if (bookings != null) {
                 int slot = 1;
                 for (QueueInterviewScheduler.InterviewBooking b : bookings) {
-                    writer.printf("%d,%s,%s,%s,%s,%s,%s%n",
+                    writer.printf("%d,%s,%s,%s,%s%n",
                             slot++,
                             escapeCsv(b.getTimeSlot() != null ? b.getTimeSlot().toString() : ""),
                             escapeCsv(b.getCandidate() != null ? b.getCandidate().getName() : ""),
                             escapeCsv(b.getCandidate() != null ? b.getCandidate().getAppliedRole() : ""),
-                            escapeCsv(b.getInterviewer() != null ? b.getInterviewer().getName() + " (" + b.getInterviewer().getRole() + ")" : ""),
-                            escapeCsv(b.getRoom() != null ? b.getRoom() : ""),
-                            "INTERVIEW SCHEDULED");
+                            escapeCsv(b.getInterviewer() != null ? b.getInterviewer().getName() + " (" + b.getInterviewer().getRole() + ")" : ""));
                 }
             }
         }
