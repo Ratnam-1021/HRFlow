@@ -1,7 +1,7 @@
 package com.hrflow.ui.views;
 
 import com.hrflow.app.AppContext;
-import com.hrflow.dsa.graph.InterviewScheduler;
+import com.hrflow.dsa.queue.QueueInterviewScheduler;
 import com.hrflow.model.Candidate;
 import com.hrflow.model.Department;
 import com.hrflow.model.Employee;
@@ -19,13 +19,14 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Intelligent Interview Scheduling View powered by Graph Vertex Coloring & Greedy Room Assignment.
+ * Interview Scheduling View powered by Queue & PriorityQueue with Availability Checking.
  */
 public class SchedulingView extends VBox {
     private final AppContext context = AppContext.getInstance();
-    private final ObservableList<InterviewScheduler.InterviewBooking> bookingData = FXCollections.observableArrayList();
-    private final TableView<InterviewScheduler.InterviewBooking> table = new TableView<>();
-    private final Label conflictStatusLabel = new Label("Graph Conflict Status: 0 Resource Overlaps (Optimal Coloring)");
+    private final ObservableList<QueueInterviewScheduler.InterviewBooking> bookingData = FXCollections.observableArrayList();
+    private final TableView<QueueInterviewScheduler.InterviewBooking> table = new TableView<>();
+    private final Label conflictStatusLabel = new Label("Availability Status: 0 Resource Overlaps across all slots");
+    private final ComboBox<String> queueModeCombo = new ComboBox<>();
 
     public SchedulingView() {
         setSpacing(18);
@@ -35,14 +36,14 @@ public class SchedulingView extends VBox {
         buildControlBar();
         buildTable();
 
-        generateInitialSchedule();
+        generateSchedule(true);
     }
 
     private void buildHeader() {
         VBox titleBox = new VBox(4);
-        Label title = new Label("Intelligent Interview Scheduling");
+        Label title = new Label("Queue-Based Interview Scheduling");
         title.setStyle("-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #ffffff;");
-        Label subtitle = new Label("Graph Vertex Coloring models resource constraints to prevent room and interviewer double-booking.");
+        Label subtitle = new Label("Processes interview requests via Queue / Priority Queue with fast slot and room availability checking.");
         subtitle.setStyle("-fx-font-size: 13px; -fx-text-fill: #94a3b8;");
         titleBox.getChildren().addAll(title, subtitle);
         getChildren().add(titleBox);
@@ -53,21 +54,25 @@ public class SchedulingView extends VBox {
         bar.getStyleClass().add("glass-card");
         bar.setAlignment(Pos.CENTER_LEFT);
 
-        VBox info = new VBox(4);
-        Label lbl = new Label("Algorithmic Constraints Handled:");
-        lbl.setStyle("-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #ffffff;");
-        Label sub = new Label("• Non-overlapping interviewer slots • Unique candidate sessions • Concurrent room limits");
-        sub.setStyle("-fx-font-size: 12px; -fx-text-fill: #94a3b8;");
-        info.getChildren().addAll(lbl, sub);
+        VBox queueModeBox = new VBox(4);
+        Label qLabel = new Label("Queue Processing Strategy:");
+        qLabel.setStyle("-fx-font-size: 12px; -fx-font-weight: 600; -fx-text-fill: #cbd5e1;");
+        queueModeCombo.getItems().addAll("Priority Queue (Score Order)", "FIFO Queue (Arrival Order)");
+        queueModeCombo.setValue("Priority Queue (Score Order)");
+        queueModeCombo.setStyle("-fx-background-color: #1e293b;");
+        queueModeBox.getChildren().addAll(qLabel, queueModeCombo);
 
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        Button regenerateBtn = new Button("⚡ Re-Solve Graph Schedule");
+        Button regenerateBtn = new Button("⚡ Run Queue Scheduler");
         regenerateBtn.getStyleClass().add("btn-primary");
-        regenerateBtn.setOnAction(e -> generateInitialSchedule());
+        regenerateBtn.setOnAction(e -> {
+            boolean usePQ = queueModeCombo.getValue().contains("Priority");
+            generateSchedule(usePQ);
+        });
 
-        bar.getChildren().addAll(info, spacer, regenerateBtn);
+        bar.getChildren().addAll(queueModeBox, spacer, regenerateBtn);
         getChildren().add(bar);
     }
 
@@ -84,11 +89,11 @@ public class SchedulingView extends VBox {
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         VBox.setVgrow(table, Priority.ALWAYS);
 
-        TableColumn<InterviewScheduler.InterviewBooking, String> colId = new TableColumn<>("Booking Ref");
+        TableColumn<QueueInterviewScheduler.InterviewBooking, String> colId = new TableColumn<>("Booking Ref");
         colId.setCellValueFactory(new PropertyValueFactory<>("id"));
         colId.setMaxWidth(110);
 
-        TableColumn<InterviewScheduler.InterviewBooking, LocalTime> colTime = new TableColumn<>("Time Slot");
+        TableColumn<QueueInterviewScheduler.InterviewBooking, LocalTime> colTime = new TableColumn<>("Time Slot");
         colTime.setCellValueFactory(new PropertyValueFactory<>("timeSlot"));
         colTime.setCellFactory(col -> new TableCell<>() {
             @Override
@@ -102,15 +107,15 @@ public class SchedulingView extends VBox {
             }
         });
 
-        TableColumn<InterviewScheduler.InterviewBooking, String> colCandidate = new TableColumn<>("Candidate");
+        TableColumn<QueueInterviewScheduler.InterviewBooking, String> colCandidate = new TableColumn<>("Candidate");
         colCandidate.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(
                 cellData.getValue().getCandidate().getName() + " (" + cellData.getValue().getCandidate().getAppliedRole() + ")"));
 
-        TableColumn<InterviewScheduler.InterviewBooking, String> colInterviewer = new TableColumn<>("Assigned Interviewer");
+        TableColumn<QueueInterviewScheduler.InterviewBooking, String> colInterviewer = new TableColumn<>("Assigned Interviewer");
         colInterviewer.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(
                 cellData.getValue().getInterviewer().getName() + " - " + cellData.getValue().getInterviewer().getRole()));
 
-        TableColumn<InterviewScheduler.InterviewBooking, String> colRoom = new TableColumn<>("Allocated Room");
+        TableColumn<QueueInterviewScheduler.InterviewBooking, String> colRoom = new TableColumn<>("Allocated Room");
         colRoom.setCellValueFactory(new PropertyValueFactory<>("room"));
         colRoom.setCellFactory(col -> new TableCell<>() {
             @Override
@@ -134,17 +139,18 @@ public class SchedulingView extends VBox {
         getChildren().add(card);
     }
 
-    private void generateInitialSchedule() {
+    private void generateSchedule(boolean usePriorityQueue) {
         List<Candidate> top = context.getCandidateService().rankCandidates(Set.of("Java", "Spring Boot", "SQL"), 8);
         List<Employee> interviewers = context.getEmployeeService().getEmployeesByDepartment(Department.ENGINEERING);
         if (interviewers.isEmpty()) {
             interviewers = context.getEmployeeService().getAllEmployees();
         }
 
-        List<InterviewScheduler.InterviewBooking> bookings = context.getSchedulingService().autoSchedule(
-                top, interviewers, LocalDate.now().plusDays(1)
+        List<QueueInterviewScheduler.InterviewBooking> bookings = context.getSchedulingService().autoSchedule(
+                top, interviewers, LocalDate.now().plusDays(1), usePriorityQueue
         );
         bookingData.setAll(bookings);
-        conflictStatusLabel.setText(String.format("Graph Conflict Status: 0 Resource Overlaps across %d scheduled sessions", bookings.size()));
+        conflictStatusLabel.setText(String.format("Availability Check: 0 Conflicts | %d sessions scheduled using %s",
+                bookings.size(), usePriorityQueue ? "Priority Queue" : "FIFO Queue"));
     }
 }

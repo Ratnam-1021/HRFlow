@@ -1,7 +1,7 @@
 package com.hrflow.service;
 
-import com.hrflow.dsa.graph.InterviewScheduler;
 import com.hrflow.dsa.interval.LeaveOverlapDetector;
+import com.hrflow.dsa.queue.QueueInterviewScheduler;
 import com.hrflow.model.*;
 
 import java.time.LocalDate;
@@ -25,7 +25,7 @@ public class AutomationCenterService {
         public int shortlistedCount;
         public List<Candidate> topCandidates;
         public int scheduledInterviewsCount;
-        public List<InterviewScheduler.InterviewBooking> schedule;
+        public List<QueueInterviewScheduler.InterviewBooking> schedule;
         public int leaveConflictsDetected;
         public List<LeaveOverlapDetector.ConflictReport> leaveConflicts;
         public int urgentTasksCreated;
@@ -50,49 +50,49 @@ public class AutomationCenterService {
             long startTime = System.currentTimeMillis();
             AutomationResult result = new AutomationResult();
 
-            // Step 1: Candidate Screening & Ranking via MaxHeap
-            progressListener.accept("Scanning applicant pool and evaluating skills with Trie...");
-            sleep(400);
+            // Step 1: Candidate Screening & Ranking via Selection Sort
+            progressListener.accept("Scanning applicant pool with HashMap & Linear filtering...");
+            sleep(350);
 
             List<Candidate> allApplicants = candidateService.getAllCandidates();
             result.totalCandidatesProcessed = allApplicants.size();
 
-            Set<String> targetSkills = Set.of("Java", "Spring Boot", "SQL", "DSA");
+            Set<String> targetSkills = Set.of("Java", "Spring Boot", "SQL");
             List<Candidate> topRanked = candidateService.rankCandidates(targetSkills, 15);
             result.shortlistedCount = topRanked.size();
             result.topCandidates = topRanked;
 
-            // Shortlist top candidates
+            // Shortlist top candidates (tracked on Undo Stack)
             for (Candidate c : topRanked) {
                 candidateService.updateCandidateStatus(c, Candidate.CandidateStatus.SHORTLISTED);
             }
-            progressListener.accept(String.format("Screened %d candidates. Prioritized top %d via MaxHeap.",
+            progressListener.accept(String.format("Screened %d candidates. Prioritized top %d via Selection Sort.",
                     result.totalCandidatesProcessed, result.shortlistedCount));
-            sleep(400);
+            sleep(350);
 
-            // Step 2: Conflict-free Interview Scheduling via Graph Coloring
-            progressListener.accept("Running Graph Conflict Coloring for interview allocations...");
-            sleep(400);
+            // Step 2: Queue / Priority Queue Interview Scheduling with Availability Check
+            progressListener.accept("Processing interview queue with slot & room availability checks...");
+            sleep(350);
 
             List<Employee> interviewers = employeeService.getEmployeesByDepartment(Department.ENGINEERING);
             if (interviewers.isEmpty()) {
                 interviewers = employeeService.getAllEmployees();
             }
 
-            // Schedule the top 8 candidates
+            // Schedule the top 8 candidates via PriorityQueue
             List<Candidate> toInterview = topRanked.subList(0, Math.min(8, topRanked.size()));
-            List<InterviewScheduler.InterviewBooking> bookings = schedulingService.autoSchedule(
-                    toInterview, interviewers, LocalDate.now().plusDays(1)
+            List<QueueInterviewScheduler.InterviewBooking> bookings = schedulingService.autoSchedule(
+                    toInterview, interviewers, LocalDate.now().plusDays(1), true
             );
             result.scheduledInterviewsCount = bookings.size();
             result.schedule = bookings;
-            progressListener.accept(String.format("Scheduled %d zero-conflict interviews across rooms and panels.",
+            progressListener.accept(String.format("Scheduled %d zero-conflict interviews via PriorityQueue.",
                     result.scheduledInterviewsCount));
-            sleep(400);
+            sleep(350);
 
             // Step 3: Sweep-line Department Leave Bottleneck Detection
             progressListener.accept("Analyzing departmental absence overlaps using Sweep-Line intervals...");
-            sleep(400);
+            sleep(350);
 
             List<LeaveOverlapDetector.ConflictReport> conflicts = leaveService.detectConflicts(2);
             result.leaveConflictsDetected = conflicts.size();
@@ -100,11 +100,11 @@ public class AutomationCenterService {
 
             progressListener.accept(String.format("Detected %d operational leave bottleneck alerts.",
                     result.leaveConflictsDetected));
-            sleep(400);
-
-            // Step 4: Prioritized Daily Task Dispatch via TaskPriorityQueue
-            progressListener.accept("Formulating prioritized HR operational action items...");
             sleep(300);
+
+            // Step 4: Prioritized Daily Task Dispatch via Priority Queue
+            progressListener.accept("Formulating prioritized HR operational action items...");
+            sleep(250);
 
             int newTaskCount = 0;
             if (!conflicts.isEmpty()) {
@@ -123,7 +123,7 @@ public class AutomationCenterService {
                 taskService.addTask(new HRTask(
                         "AUTO-TSK-" + (System.currentTimeMillis() + 1),
                         "Send Interview Invitations to " + toInterview.size() + " Shortlisted Candidates",
-                        "Automated graph schedule ready for tomorrow's panel sessions.",
+                        "Queue-based schedule ready for tomorrow's panel sessions.",
                         HRTask.Priority.HIGH,
                         LocalDate.now(),
                         Department.HUMAN_RESOURCES
