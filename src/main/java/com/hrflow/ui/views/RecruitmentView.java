@@ -279,11 +279,13 @@ public class RecruitmentView extends VBox {
         Set<String> skills = selectedFilterSkills.isEmpty() ? Set.of("Java", "SQL") : selectedFilterSkills;
         List<Candidate> ranked = context.getCandidateService().rankCandidates(skills, topK);
         candidateData.setAll(ranked);
+        historyStatusLabel.setText(String.format("Displaying top %d qualified candidates by profile match.", ranked.size()));
     }
 
     private void runInsertionSort() {
         List<Candidate> sorted = context.getCandidateService().getCandidatesSortedByInsertionSort();
         candidateData.setAll(sorted);
+        historyStatusLabel.setText(String.format("Sorted %d candidates by qualification score.", sorted.size()));
     }
 
     private void handleUndo() {
@@ -324,5 +326,6 @@ public class RecruitmentView extends VBox {
         suggestionsPane.getChildren().clear();
         skillSearchField.clear();
         loadAllCandidates();
+        historyStatusLabel.setText("Filters reset. Showing all candidates.");
     }
 }
