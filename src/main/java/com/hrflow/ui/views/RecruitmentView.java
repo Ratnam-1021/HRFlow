@@ -10,7 +10,14 @@ import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.*;
+import javafx.stage.FileChooser;
+import javafx.stage.Window;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 /**
@@ -107,7 +114,11 @@ public class RecruitmentView extends VBox {
         resetBtn.getStyleClass().add("btn-secondary");
         resetBtn.setOnAction(e -> resetFilters());
 
-        row1.getChildren().addAll(roleBox, searchBox, spinnerBox, rankBtn, insertionBtn, undoBtn, redoBtn, resetBtn);
+        Button exportBtn = new Button("📥 Export Summary");
+        exportBtn.getStyleClass().add("export-btn");
+        exportBtn.setOnAction(e -> exportCandidateSummary());
+
+        row1.getChildren().addAll(roleBox, searchBox, spinnerBox, rankBtn, insertionBtn, undoBtn, redoBtn, resetBtn, exportBtn);
 
         // Autocomplete suggestions chip bar
         suggestionsPane.setHgap(8);
@@ -349,5 +360,56 @@ public class RecruitmentView extends VBox {
         skillSearchField.clear();
         loadAllCandidates();
         historyStatusLabel.setText("Filters reset. Showing all candidates.");
+    }
+
+    private void exportCandidateSummary() {
+        if (candidateData.isEmpty()) {
+            showAlert("Export Notice", "No candidates available to export.");
+            return;
+        }
+
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Export Candidates Summary (CSV)");
+        fileChooser.setInitialFileName("candidates_pipeline_summary.csv");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV Files (*.csv)", "*.csv"));
+
+        Window window = getScene() != null ? getScene().getWindow() : null;
+        File file = fileChooser.showSaveDialog(window);
+        if (file == null) return;
+
+        try (PrintWriter writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8))) {
+            writer.println("Rank,Candidate Name,Applied Role,Experience (Years),Overall Score (%),Status");
+            int rank = 1;
+            for (Candidate c : candidateData) {
+                writer.printf("%d,%s,%s,%.1f,%.1f%%,%s%n",
+                        rank++,
+                        escapeCsv(c.getName()),
+                        escapeCsv(c.getAppliedRole()),
+                        c.getExperienceYears(),
+                        c.getOverallScore(),
+                        c.getStatus() != null ? c.getStatus().name() : "APPLIED"
+                );
+            }
+            historyStatusLabel.setText(String.format("Exported %d candidates to %s", candidateData.size(), file.getName()));
+            showAlert("Export Successful", "Candidate summary exported successfully (" + candidateData.size() + " candidates):\n" + file.getAbsolutePath());
+        } catch (Exception ex) {
+            showAlert("Export Error", "Failed to export candidates: " + ex.getMessage());
+        }
+    }
+
+    private static String escapeCsv(String val) {
+        if (val == null) return "";
+        if (val.contains(",") || val.contains("\"") || val.contains("\n")) {
+            return "\"" + val.replace("\"", "\"\"") + "\"";
+        }
+        return val;
+    }
+
+    private void showAlert(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 }

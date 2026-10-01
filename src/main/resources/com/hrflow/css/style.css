@@ -129,6 +129,23 @@
     -fx-background-color: #FFF2E8;
 }
 
+.export-btn {
+    -fx-background-color: #FAF5ED;
+    -fx-text-fill: #5C4D3E;
+    -fx-font-weight: 700;
+    -fx-font-size: 12px;
+    -fx-padding: 7 14;
+    -fx-border-color: #E2D4C3;
+    -fx-border-radius: 20px;
+    -fx-background-radius: 20px;
+    -fx-cursor: hand;
+}
+
+.export-btn:hover {
+    -fx-background-color: #EFE4D6;
+    -fx-text-fill: #1A110B;
+}
+
 .skill-chip-tag {
     -fx-background-color: #F4EAE0;
     -fx-text-fill: #4A3B2C;

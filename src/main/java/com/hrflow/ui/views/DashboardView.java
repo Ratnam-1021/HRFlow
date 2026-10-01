@@ -16,7 +16,14 @@ import javafx.scene.paint.LinearGradient;
 import javafx.scene.paint.RadialGradient;
 import javafx.scene.paint.Stop;
 import javafx.scene.shape.Rectangle;
+import javafx.stage.FileChooser;
+import javafx.stage.Window;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -386,14 +393,22 @@ public class DashboardView extends VBox {
         Region sp = new Region();
         HBox.setHgrow(sp, Priority.ALWAYS);
 
+        TableView<Candidate> candidateTable = createCandidateTable();
+        VBox.setVgrow(candidateTable, Priority.ALWAYS);
+
+        Button exportBtn = new Button("📥 Export Summary");
+        exportBtn.getStyleClass().add("export-btn");
+        exportBtn.setOnAction(e -> exportSummary(candidateTable.getItems(), getScene() != null ? getScene().getWindow() : null));
+
         Button viewAllBtn = new Button("View Full Pipeline →");
         viewAllBtn.getStyleClass().add("view-pipeline-btn");
         viewAllBtn.setOnAction(e -> navigationHandler.accept("recruitment"));
 
-        header.getChildren().addAll(trophyIcon, titleBox, sp, viewAllBtn);
+        HBox actionsBox = new HBox(8);
+        actionsBox.setAlignment(Pos.CENTER_RIGHT);
+        actionsBox.getChildren().addAll(exportBtn, viewAllBtn);
 
-        TableView<Candidate> candidateTable = createCandidateTable();
-        VBox.setVgrow(candidateTable, Priority.ALWAYS);
+        header.getChildren().addAll(trophyIcon, titleBox, sp, actionsBox);
         card.getChildren().addAll(header, candidateTable);
 
         getChildren().add(card);
@@ -562,5 +577,54 @@ public class DashboardView extends VBox {
         String[] parts = name.trim().split("\\s+");
         if (parts.length == 1) return parts[0].substring(0, Math.min(2, parts[0].length())).toUpperCase();
         return ("" + parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+    }
+
+    private void exportSummary(List<Candidate> candidates, Window window) {
+        if (candidates == null || candidates.isEmpty()) {
+            showAlert("Export Notice", "No candidates available to export.");
+            return;
+        }
+
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Export Candidate Summary (CSV)");
+        fileChooser.setInitialFileName("candidate_summary.csv");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV Files (*.csv)", "*.csv"));
+
+        File file = fileChooser.showSaveDialog(window);
+        if (file == null) return;
+
+        try (PrintWriter writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8))) {
+            writer.println("Rank,Candidate Name,Applied Role,Experience (Years),Overall Score (%),Status");
+            int rank = 1;
+            for (Candidate c : candidates) {
+                writer.printf("%d,%s,%s,%.1f,%.1f%%,%s%n",
+                        rank++,
+                        escapeCsv(c.getName()),
+                        escapeCsv(c.getAppliedRole()),
+                        c.getExperienceYears(),
+                        c.getOverallScore(),
+                        c.getStatus() != null ? c.getStatus().name() : "APPLIED"
+                );
+            }
+            showAlert("Export Successful", "Candidate summary exported successfully (" + candidates.size() + " candidates):\n" + file.getAbsolutePath());
+        } catch (Exception ex) {
+            showAlert("Export Error", "Failed to export candidates: " + ex.getMessage());
+        }
+    }
+
+    private static String escapeCsv(String val) {
+        if (val == null) return "";
+        if (val.contains(",") || val.contains("\"") || val.contains("\n")) {
+            return "\"" + val.replace("\"", "\"\"") + "\"";
+        }
+        return val;
+    }
+
+    private void showAlert(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 }
