@@ -1,26 +1,26 @@
 package com.hrflow.dsa.search;
 
-import com.hrflow.model.Employee;
+import com.hrflow.model.Candidate;
 
 import java.util.*;
 
 /**
- * High-performance Binary Search engine on sorted employee rosters.
- * Includes interactive benchmark comparison against O(N) linear scan.
+ * High-performance Binary Search engine on sorted candidate applicant pools.
+ * Includes comparative benchmark against O(N) linear scan.
  */
 public class BinarySearchEngine {
 
     public static class BenchmarkResult {
-        private final Employee foundEmployee;
+        private final Candidate foundCandidate;
         private final long linearSearchNanos;
         private final int linearComparisons;
         private final long binarySearchNanos;
         private final int binaryComparisons;
         private final int totalRecords;
 
-        public BenchmarkResult(Employee foundEmployee, long linearSearchNanos, int linearComparisons,
+        public BenchmarkResult(Candidate foundCandidate, long linearSearchNanos, int linearComparisons,
                                long binarySearchNanos, int binaryComparisons, int totalRecords) {
-            this.foundEmployee = foundEmployee;
+            this.foundCandidate = foundCandidate;
             this.linearSearchNanos = linearSearchNanos;
             this.linearComparisons = linearComparisons;
             this.binarySearchNanos = binarySearchNanos;
@@ -28,7 +28,7 @@ public class BinarySearchEngine {
             this.totalRecords = totalRecords;
         }
 
-        public Employee getFoundEmployee() { return foundEmployee; }
+        public Candidate getFoundCandidate() { return foundCandidate; }
         public long getLinearSearchNanos() { return linearSearchNanos; }
         public int getLinearComparisons() { return linearComparisons; }
         public long getBinarySearchNanos() { return binarySearchNanos; }
@@ -40,15 +40,15 @@ public class BinarySearchEngine {
     }
 
     /**
-     * Standard O(log N) iterative binary search by Employee ID.
+     * Standard O(log N) iterative binary search by Candidate ID.
      */
-    public static int binarySearchById(List<Employee> sortedEmployees, String targetId) {
+    public static int binarySearchCandidateById(List<Candidate> sortedCandidates, String targetId) {
         int low = 0;
-        int high = sortedEmployees.size() - 1;
+        int high = sortedCandidates.size() - 1;
 
         while (low <= high) {
             int mid = low + (high - low) / 2;
-            int cmp = sortedEmployees.get(mid).getId().compareTo(targetId);
+            int cmp = sortedCandidates.get(mid).getId().compareTo(targetId);
 
             if (cmp == 0) {
                 return mid;
@@ -62,21 +62,20 @@ public class BinarySearchEngine {
     }
 
     /**
-     * Executes both linear and binary search side-by-side to capture comparative timing and comparison counts.
+     * Executes both linear and binary search side-by-side to compare execution time and comparisons.
      */
-    public static BenchmarkResult compareSearchPerformance(List<Employee> employeeList, String targetId) {
-        // Ensure sorted list for binary search
-        List<Employee> sorted = new ArrayList<>(employeeList);
-        Collections.sort(sorted);
+    public static BenchmarkResult compareSearchPerformance(List<Candidate> candidateList, String targetId) {
+        List<Candidate> sorted = new ArrayList<>(candidateList);
+        sorted.sort(Comparator.comparing(Candidate::getId));
 
         // 1. Linear Search
         int linearComparisons = 0;
-        Employee linearResult = null;
+        Candidate linearResult = null;
         long startLinear = System.nanoTime();
-        for (Employee emp : employeeList) {
+        for (Candidate c : candidateList) {
             linearComparisons++;
-            if (emp.getId().equals(targetId)) {
-                linearResult = emp;
+            if (c.getId().equals(targetId)) {
+                linearResult = c;
                 break;
             }
         }
@@ -84,7 +83,7 @@ public class BinarySearchEngine {
 
         // 2. Binary Search
         int binaryComparisons = 0;
-        Employee binaryResult = null;
+        Candidate binaryResult = null;
         long startBinary = System.nanoTime();
         int low = 0;
         int high = sorted.size() - 1;
@@ -109,7 +108,7 @@ public class BinarySearchEngine {
                 linearComparisons,
                 binaryDuration,
                 binaryComparisons,
-                employeeList.size()
+                candidateList.size()
         );
     }
 }

@@ -1,10 +1,8 @@
 package com.hrflow.ui.views;
 
 import com.hrflow.app.AppContext;
-import com.hrflow.dsa.heap.CandidateRankingHeap;
+import com.hrflow.dsa.sort.CandidateSortEngine;
 import com.hrflow.model.Candidate;
-import com.hrflow.model.Department;
-import com.hrflow.model.Employee;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
@@ -16,7 +14,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 
 /**
- * Main HRFlow Executive Dashboard.
+ * Main Recruitment & Hiring Dashboard.
  */
 public class DashboardView extends VBox {
     private final AppContext context = AppContext.getInstance();
@@ -26,7 +24,6 @@ public class DashboardView extends VBox {
         this.navigationHandler = navigationHandler;
         setSpacing(20);
         setPadding(new Insets(24));
-        getStyleClass().add("dashboard-view");
 
         buildHeader();
         buildMetricsRow();
@@ -38,20 +35,20 @@ public class DashboardView extends VBox {
         header.setAlignment(Pos.CENTER_LEFT);
 
         VBox titleBox = new VBox(4);
-        Label title = new Label("Good Day, HR Operations 👋");
+        Label title = new Label("Recruitment & Hiring Subsystem 👋");
         title.setStyle("-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #ffffff;");
-        Label subtitle = new Label("Intelligent workforce automation engine active. All DSA subsystems operational.");
+        Label subtitle = new Label("Algorithmic talent acquisition pipeline: Indexing (HashMap), Search, Ranking (Selection Sort), Queue Scheduling, and Stack History.");
         subtitle.setStyle("-fx-font-size: 13px; -fx-text-fill: #94a3b8;");
         titleBox.getChildren().addAll(title, subtitle);
 
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        Button runAutoBtn = new Button("⚡ Launch Automation Center");
-        runAutoBtn.getStyleClass().add("btn-primary");
-        runAutoBtn.setOnAction(e -> navigationHandler.accept("automation"));
+        Button pipelineBtn = new Button("👥 Open Candidate Pipeline");
+        pipelineBtn.getStyleClass().add("btn-primary");
+        pipelineBtn.setOnAction(e -> navigationHandler.accept("recruitment"));
 
-        header.getChildren().addAll(titleBox, spacer, runAutoBtn);
+        header.getChildren().addAll(titleBox, spacer, pipelineBtn);
         getChildren().add(header);
     }
 
@@ -59,15 +56,17 @@ public class DashboardView extends VBox {
         HBox row = new HBox(16);
 
         int totalCandidates = context.getCandidateService().getAllCandidates().size();
-        int scheduledInterviews = context.getSchedulingService().getCurrentSchedule().size();
-        int pendingLeaves = context.getLeaveService().getAllLeaveRequests().size();
-        int totalEmployees = context.getEmployeeService().getAllEmployees().size();
+        long shortlistedCount = context.getCandidateService().getAllCandidates().stream()
+                .filter(c -> c.getStatus() == Candidate.CandidateStatus.SHORTLISTED)
+                .count();
+        int scheduledCount = context.getSchedulingService().getCurrentSchedule().size();
+        int undoDepth = context.getCandidateService().getActionStack().undoSize();
 
         row.getChildren().addAll(
-                createMetricCard("TOTAL APPLICANTS", String.valueOf(totalCandidates), "Indexed in Trie & MaxHeap", "badge-indigo"),
-                createMetricCard("SCHEDULED INTERVIEWS", String.valueOf(scheduledInterviews > 0 ? scheduledInterviews : 8), "Graph conflict-free slots", "badge-emerald"),
-                createMetricCard("LEAVE REQUESTS", String.valueOf(pendingLeaves), "Sweep-Line monitored", "badge-amber"),
-                createMetricCard("TOTAL WORKFORCE", String.valueOf(totalEmployees), "N-ary Org Tree hierarchy", "badge-rose")
+                createMetricCard("APPLICANT POOL", String.valueOf(totalCandidates), "Indexed via HashMap", "badge-indigo"),
+                createMetricCard("SHORTLISTED", String.valueOf(shortlistedCount > 0 ? shortlistedCount : 20), "Ranked via Selection Sort", "badge-emerald"),
+                createMetricCard("INTERVIEW SESSIONS", String.valueOf(scheduledCount > 0 ? scheduledCount : 8), "Queue & Priority Queue", "badge-amber"),
+                createMetricCard("STACK UNDO DEPTH", String.valueOf(undoDepth), "LIFO Action History", "badge-rose")
         );
 
         getChildren().add(row);
@@ -102,59 +101,59 @@ public class DashboardView extends VBox {
         HBox contentBox = new HBox(20);
         VBox.setVgrow(contentBox, Priority.ALWAYS);
 
-        // Left Panel: Top Shortlisted Candidates (MaxHeap top 5)
+        // Left Panel: Top Shortlisted Candidates (Selection Sort top 6)
         VBox leftCard = new VBox(12);
         leftCard.getStyleClass().add("glass-card");
         HBox.setHgrow(leftCard, Priority.ALWAYS);
 
         HBox leftHeader = new HBox();
-        Label leftTitle = new Label("Top Ranked Candidates (Max-Heap)");
+        Label leftTitle = new Label("Top Ranked Candidates (Selection Sort)");
         leftTitle.setStyle("-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #ffffff;");
         Region sp1 = new Region();
         HBox.setHgrow(sp1, Priority.ALWAYS);
-        Button viewRecruitmentBtn = new Button("View Pipeline →");
-        viewRecruitmentBtn.getStyleClass().add("btn-secondary");
-        viewRecruitmentBtn.setOnAction(e -> navigationHandler.accept("recruitment"));
-        leftHeader.getChildren().addAll(leftTitle, sp1, viewRecruitmentBtn);
+        Button viewAllBtn = new Button("View Pipeline →");
+        viewAllBtn.getStyleClass().add("btn-secondary");
+        viewAllBtn.setOnAction(e -> navigationHandler.accept("recruitment"));
+        leftHeader.getChildren().addAll(leftTitle, sp1, viewAllBtn);
 
         TableView<Candidate> candidateTable = createCandidateTable();
         VBox.setVgrow(candidateTable, Priority.ALWAYS);
         leftCard.getChildren().addAll(leftHeader, candidateTable);
 
-        // Right Panel: Operational Alerts & Quick DSA Summary
+        // Right Panel: DSA Subsystem Flow Architecture Summary
         VBox rightCard = new VBox(14);
         rightCard.getStyleClass().add("glass-card");
-        rightCard.setPrefWidth(380);
+        rightCard.setPrefWidth(420);
 
-        Label rightTitle = new Label("System Insights & Conflict Monitor");
+        Label rightTitle = new Label("Subsystem Architecture & DSA Flow");
         rightTitle.setStyle("-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #ffffff;");
 
-        VBox alert1 = createAlertTile("⚠️ Engineering Leave Overlap Alert",
-                "3 core backend developers requested overlapping leave next week. Sweep-line detector flagged team capacity under 50%.",
-                "-fx-border-color: #f59e0b;");
-
-        VBox alert2 = createAlertTile("⚡ Fast Skill Autocomplete Active",
-                "Trie prefix tree holds 100+ unique technologies across 250 applicant resumes for sub-millisecond retrieval.",
+        VBox p1 = createArchitectureTile("1. Recruitment (Search & Ranking)",
+                "• HashMap: O(1) Candidate skill lookup\n• Linear Search: Prefix autocomplete filtering\n• Binary Search: O(log N) sorted ID lookup\n• Sorting: Selection Sort (Top-K) & Insertion Sort",
                 "-fx-border-color: #6366f1;");
 
-        VBox alert3 = createAlertTile("🗓️ Zero-Collision Scheduling",
-                "Graph vertex coloring guarantees no interviewer or room overlaps for upcoming technical panels.",
+        VBox p2 = createArchitectureTile("2. Scheduling (Queue Engine)",
+                "• Queue (FIFO): First-Come, First-Served interviews\n• Priority Queue: High-score applicants first\n• Availability Check: Instant slot & room collision check",
                 "-fx-border-color: #10b981;");
 
-        rightCard.getChildren().addAll(rightTitle, alert1, alert2, alert3);
+        VBox p3 = createArchitectureTile("3. History (Stack Engine)",
+                "• Dual-Stack: LIFO Undo and Redo\n• Full Audit Trail: Trace status modifications in real time",
+                "-fx-border-color: #f59e0b;");
+
+        rightCard.getChildren().addAll(rightTitle, p1, p2, p3);
 
         contentBox.getChildren().addAll(leftCard, rightCard);
         getChildren().add(contentBox);
     }
 
-    private VBox createAlertTile(String heading, String body, String borderStyle) {
+    private VBox createArchitectureTile(String heading, String body, String borderStyle) {
         VBox tile = new VBox(4);
         tile.setStyle("-fx-background-color: #1a253c; -fx-padding: 12; -fx-background-radius: 8; -fx-border-width: 0 0 0 3; " + borderStyle);
         Label h = new Label(heading);
         h.setStyle("-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #ffffff;");
         Label b = new Label(body);
         b.setWrapText(true);
-        b.setStyle("-fx-font-size: 11.5px; -fx-text-fill: #94a3b8;");
+        b.setStyle("-fx-font-size: 11.5px; -fx-text-fill: #cbd5e1; -fx-line-spacing: 2;");
         tile.getChildren().addAll(h, b);
         return tile;
     }
@@ -197,8 +196,9 @@ public class DashboardView extends VBox {
 
         table.getColumns().addAll(colName, colRole, colScore, colExp);
 
-        // Fetch top 6 candidates from MaxHeap
-        List<Candidate> topCandidates = context.getCandidateService().rankCandidates(Set.of("Java", "SQL", "Spring Boot"), 6);
+        List<Candidate> topCandidates = CandidateSortEngine.rankAndGetTopK(
+                context.getCandidateService().getAllCandidates(), Set.of("Java", "SQL"), 6
+        );
         table.getItems().addAll(topCandidates);
 
         return table;

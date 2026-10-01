@@ -1,12 +1,13 @@
 package com.hrflow.dsa;
 
 import com.hrflow.dsa.queue.QueueInterviewScheduler;
+import com.hrflow.dsa.search.BinarySearchEngine;
 import com.hrflow.dsa.search.SkillSearchManager;
 import com.hrflow.dsa.sort.CandidateSortEngine;
 import com.hrflow.dsa.stack.HRActionStack;
 import com.hrflow.model.Candidate;
-import com.hrflow.model.Employee;
 import com.hrflow.model.HRAction;
+import com.hrflow.model.Interviewer;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -47,6 +48,26 @@ public class RecruitmentSimplifiedTestSuite {
     }
 
     @Test
+    @DisplayName("Pillar 1: Binary Search on sorted Candidate list")
+    void testBinarySearchCandidate() {
+        List<Candidate> list = new ArrayList<>();
+        for (int i = 1; i <= 50; i++) {
+            String id = String.format("CAN-%04d", i);
+            list.add(new Candidate(id, "Candidate " + i, "c" + i + "@mail.com", "Engineer", Set.of("Java"), 2, 70, 70, 70));
+        }
+
+        int index = BinarySearchEngine.binarySearchCandidateById(list, "CAN-0027");
+        assertEquals(26, index);
+        assertEquals("CAN-0027", list.get(index).getId());
+
+        BinarySearchEngine.BenchmarkResult res = BinarySearchEngine.compareSearchPerformance(list, "CAN-0049");
+        assertNotNull(res.getFoundCandidate());
+        assertEquals("CAN-0049", res.getFoundCandidate().getId());
+        assertTrue(res.getBinaryComparisons() < res.getLinearComparisons(),
+                "Binary search comparisons should be less than linear scan for end items");
+    }
+
+    @Test
     @DisplayName("Pillar 1: Candidate Ranking via Selection Sort (Top-K) and Insertion Sort")
     void testSelectionAndInsertionSort() {
         Candidate c1 = new Candidate("C1", "Aman", "aman@ex.com", "Dev", Set.of("Java"), 5.0, 90, 85, 80);
@@ -72,7 +93,7 @@ public class RecruitmentSimplifiedTestSuite {
     void testQueueInterviewScheduler() {
         Candidate c1 = new Candidate("C1", "Candidate 1", "c1@test.com", "Dev", Set.of("Java"), 3, 80, 80, 80);
         Candidate c2 = new Candidate("C2", "Candidate 2", "c2@test.com", "Dev", Set.of("Java"), 4, 85, 85, 85);
-        Employee interviewerA = new Employee("I1", "Interviewer A", "ia@corp.com", null, "Senior Dev", null, 120000, LocalDate.now(), 98, 90);
+        Interviewer interviewerA = new Interviewer("I1", "Interviewer A", "Senior Dev", "ia@corp.com");
 
         List<QueueInterviewScheduler.ScheduledSession> requests = List.of(
                 new QueueInterviewScheduler.ScheduledSession(c1, interviewerA),
@@ -89,7 +110,6 @@ public class RecruitmentSimplifiedTestSuite {
         );
 
         assertEquals(2, bookings.size());
-        // Since same interviewer is needed, they MUST be at different slots
         assertNotEquals(bookings.get(0).getTimeSlot(), bookings.get(1).getTimeSlot());
     }
 
@@ -100,13 +120,12 @@ public class RecruitmentSimplifiedTestSuite {
         Candidate c = new Candidate("C10", "Dev Test", "d@test.com", "Engineer", Set.of("Java"), 2, 70, 70, 70);
         assertEquals(Candidate.CandidateStatus.APPLIED, c.getStatus());
 
-        // Action: Shortlist candidate
         HRAction action = new HRAction(
                 "ACT-1",
                 HRAction.ActionType.SHORTLIST,
                 "Shortlisted Dev Test",
-                () -> c.setStatus(Candidate.CandidateStatus.APPLIED), // Undo logic
-                () -> c.setStatus(Candidate.CandidateStatus.SHORTLISTED) // Redo logic
+                () -> c.setStatus(Candidate.CandidateStatus.APPLIED),
+                () -> c.setStatus(Candidate.CandidateStatus.SHORTLISTED)
         );
         c.setStatus(Candidate.CandidateStatus.SHORTLISTED);
         stack.pushAction(action);
@@ -115,13 +134,11 @@ public class RecruitmentSimplifiedTestSuite {
         assertFalse(stack.canRedo());
         assertEquals(Candidate.CandidateStatus.SHORTLISTED, c.getStatus());
 
-        // Perform Undo (Stack Pop)
         HRAction undone = stack.undo();
         assertNotNull(undone);
         assertEquals(Candidate.CandidateStatus.APPLIED, c.getStatus());
         assertTrue(stack.canRedo());
 
-        // Perform Redo
         HRAction redone = stack.redo();
         assertNotNull(redone);
         assertEquals(Candidate.CandidateStatus.SHORTLISTED, c.getStatus());

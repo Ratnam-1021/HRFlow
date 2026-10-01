@@ -12,27 +12,26 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Main Layout Shell featuring sidebar navigation and dynamic content switching.
+ * Main Layout Shell strictly tailored for the Recruitment & Hiring Subsystem.
  */
 public class MainLayout extends BorderPane {
     private final StackPane contentArea = new StackPane();
     private final Map<String, Node> viewCache = new HashMap<>();
     private final Map<String, Button> navButtons = new HashMap<>();
-    private final Label topTitle = new Label("Executive Dashboard");
+    private final Label topTitle = new Label("Recruitment & Hiring Overview");
 
     public MainLayout() {
         setLeft(buildSidebar());
         setTop(buildTopBar());
         setCenter(contentArea);
 
-        // Preload default view
         switchView("dashboard");
     }
 
     private VBox buildSidebar() {
         VBox sidebar = new VBox(12);
         sidebar.getStyleClass().add("sidebar");
-        sidebar.setPrefWidth(250);
+        sidebar.setPrefWidth(260);
         sidebar.setPadding(new Insets(20, 14, 20, 14));
 
         // Brand
@@ -40,29 +39,26 @@ public class MainLayout extends BorderPane {
         brandBox.setPadding(new Insets(0, 0, 16, 8));
         Label logo = new Label("HRFlow");
         logo.getStyleClass().add("logo-text");
-        Label sub = new Label("INTELLIGENT HR AUTOMATION");
+        Label sub = new Label("RECRUITMENT & HIRING SUBSYSTEM");
         sub.getStyleClass().add("logo-subtext");
         brandBox.getChildren().addAll(logo, sub);
 
-        // Navigation links
+        // Navigation strictly for Recruitment & Hiring
         VBox navList = new VBox(6);
         addNavItem(navList, "dashboard", "📊  Dashboard");
-        addNavItem(navList, "automation", "🚀  Automation Center");
         addNavItem(navList, "recruitment", "👥  Candidate Pipeline");
-        addNavItem(navList, "scheduling", "🗓️  Smart Scheduler");
-        addNavItem(navList, "employees", "🏢  Hierarchy & Search");
-        addNavItem(navList, "leaves", "🏖️  Leave Bottlenecks");
-        addNavItem(navList, "tasks", "📋  Priority Tasks");
+        addNavItem(navList, "scheduling", "🗓️  Interview Scheduler");
+        addNavItem(navList, "history", "📜  Action History & Stack");
 
         Region spacer = new Region();
         VBox.setVgrow(spacer, Priority.ALWAYS);
 
-        // Footer info card
+        // Footer info card detailing the exact 3-pillar architecture
         VBox engineInfo = new VBox(4);
         engineInfo.setStyle("-fx-background-color: #131d33; -fx-padding: 12; -fx-background-radius: 8; -fx-border-color: #1e293b; -fx-border-radius: 8;");
-        Label eTitle = new Label("DSA Engine Core");
+        Label eTitle = new Label("Recruitment Engine");
         eTitle.setStyle("-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #34d399;");
-        Label eDesc = new Label("Heap • Trie • Graph • Tree\nInterval • Binary Search");
+        Label eDesc = new Label("P1: HashMap, Search & Sort\nP2: Queue & Priority Queue\nP3: Dual-Stack Undo / Redo");
         eDesc.setStyle("-fx-font-size: 10px; -fx-text-fill: #94a3b8;");
         engineInfo.getChildren().addAll(eTitle, eDesc);
 
@@ -93,7 +89,7 @@ public class MainLayout extends BorderPane {
         liveIndicator.setAlignment(Pos.CENTER);
         Label dot = new Label("●");
         dot.setStyle("-fx-text-fill: #10b981; -fx-font-size: 10px;");
-        Label status = new Label("Algorithmic Engine Active");
+        Label status = new Label("Recruitment Pipeline Online");
         status.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 12px; -fx-font-weight: 600;");
         liveIndicator.getChildren().addAll(dot, status);
 
@@ -102,24 +98,24 @@ public class MainLayout extends BorderPane {
     }
 
     public void switchView(String key) {
-        // Highlight active button
         navButtons.values().forEach(b -> b.getStyleClass().remove("nav-button-active"));
         Button activeBtn = navButtons.get(key);
         if (activeBtn != null) {
             activeBtn.getStyleClass().add("nav-button-active");
         }
 
-        // Lazy load views
         Node view = viewCache.computeIfAbsent(key, this::createViewInstance);
 
         switch (key) {
-            case "dashboard" -> topTitle.setText("Executive Overview & Metrics");
-            case "automation" -> topTitle.setText("HR Automation Center");
-            case "recruitment" -> topTitle.setText("Candidate Screening & MaxHeap Ranking");
-            case "scheduling" -> topTitle.setText("Conflict-Free Graph Interview Scheduler");
-            case "employees" -> topTitle.setText("Organizational Hierarchy & Binary Search Benchmarks");
-            case "leaves" -> topTitle.setText("Sweep-Line Leave Conflict Analysis");
-            case "tasks" -> topTitle.setText("Operational Task Priority Queue");
+            case "dashboard" -> topTitle.setText("Recruitment Overview & Pipeline Metrics");
+            case "recruitment" -> topTitle.setText("Candidate Screening, Sorting & Ranking");
+            case "scheduling" -> topTitle.setText("Queue & PriorityQueue Interview Scheduler");
+            case "history" -> {
+                topTitle.setText("Action History & Stack Undo / Redo Control");
+                if (view instanceof HistoryView hv) {
+                    hv.refreshHistory();
+                }
+            }
         }
 
         contentArea.getChildren().setAll(view);
@@ -128,12 +124,9 @@ public class MainLayout extends BorderPane {
     private Node createViewInstance(String key) {
         return switch (key) {
             case "dashboard" -> new DashboardView(this::switchView);
-            case "automation" -> new AutomationCenterView();
             case "recruitment" -> new RecruitmentView();
             case "scheduling" -> new SchedulingView();
-            case "employees" -> new EmployeesView();
-            case "leaves" -> new LeavesView();
-            case "tasks" -> new TasksView();
+            case "history" -> new HistoryView();
             default -> new DashboardView(this::switchView);
         };
     }

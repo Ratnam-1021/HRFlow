@@ -3,8 +3,6 @@ package com.hrflow.ui.views;
 import com.hrflow.app.AppContext;
 import com.hrflow.dsa.queue.QueueInterviewScheduler;
 import com.hrflow.model.Candidate;
-import com.hrflow.model.Department;
-import com.hrflow.model.Employee;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
@@ -141,13 +139,8 @@ public class SchedulingView extends VBox {
 
     private void generateSchedule(boolean usePriorityQueue) {
         List<Candidate> top = context.getCandidateService().rankCandidates(Set.of("Java", "Spring Boot", "SQL"), 8);
-        List<Employee> interviewers = context.getEmployeeService().getEmployeesByDepartment(Department.ENGINEERING);
-        if (interviewers.isEmpty()) {
-            interviewers = context.getEmployeeService().getAllEmployees();
-        }
-
         List<QueueInterviewScheduler.InterviewBooking> bookings = context.getSchedulingService().autoSchedule(
-                top, interviewers, LocalDate.now().plusDays(1), usePriorityQueue
+                top, context.getSchedulingService().getInterviewPanel(), LocalDate.now().plusDays(1), usePriorityQueue
         );
         bookingData.setAll(bookings);
         conflictStatusLabel.setText(String.format("Availability Check: 0 Conflicts | %d sessions scheduled using %s",
