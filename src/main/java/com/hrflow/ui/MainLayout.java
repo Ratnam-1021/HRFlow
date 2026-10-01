@@ -51,70 +51,40 @@ public class MainLayout extends BorderPane {
         flowLbl.setStyle("-fx-font-size: 19px; -fx-font-weight: 800; -fx-text-fill: #EA580C;");
         brandTitleBox.getChildren().addAll(hrLbl, flowLbl);
 
-        Label sub = new Label("RECRUITMENT & HIRING");
-        sub.getStyleClass().add("logo-subtext");
-        brandBox.getChildren().addAll(brandTitleBox, sub);
+        // Left side: Brand with logo
+        HBox leftBox = new HBox(10);
+        leftBox.setAlignment(Pos.CENTER_LEFT);
+        leftBox.getChildren().addAll(logoIcon, brandBox);
 
-        // Vertical divider
-        javafx.scene.control.Separator sep = new javafx.scene.control.Separator(javafx.geometry.Orientation.VERTICAL);
-        sep.setPrefHeight(22);
-        sep.setStyle("-fx-background-color: #EFE4D6;");
-
-        // Horizontal navigation tabs with dropdown indicators
+        // Center: Horizontal navigation tabs without dropdown chevrons
         HBox navButtonsBox = new HBox(8);
-        navButtonsBox.setAlignment(Pos.CENTER_LEFT);
-        addNavItem(navButtonsBox, "dashboard", "📊 Dashboard ▾");
-        addNavItem(navButtonsBox, "recruitment", "👥 Candidate Pipeline ▾");
-        addNavItem(navButtonsBox, "scheduling", "🗓️ Interview Scheduler ▾");
-        addNavItem(navButtonsBox, "history", "📄 Activity & Audit Log ▾");
+        navButtonsBox.setAlignment(Pos.CENTER);
+        addNavItem(navButtonsBox, "dashboard", "📊 Dashboard");
+        addNavItem(navButtonsBox, "recruitment", "👥 Candidate Pipeline");
+        addNavItem(navButtonsBox, "scheduling", "🗓️ Interview Scheduler");
+        addNavItem(navButtonsBox, "history", "📄 Activity & Audit Log");
 
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
+        Region leftSpacer = new Region();
+        HBox.setHgrow(leftSpacer, Priority.ALWAYS);
+        Region rightSpacer = new Region();
+        HBox.setHgrow(rightSpacer, Priority.ALWAYS);
 
-        // Right side: Icons + Profile button matching the hanging banner mockup
-        HBox rightCluster = new HBox(8);
+        // Right side: Profile button without dropdown chevron
+        HBox rightCluster = new HBox();
         rightCluster.setAlignment(Pos.CENTER_RIGHT);
 
-        // Language / Translate icon button
-        StackPane langBtn = new StackPane();
-        langBtn.getStyleClass().add("icon-circle-btn");
-        Label langLbl = new Label("文A");
-        langLbl.setStyle("-fx-font-size: 11.5px; -fx-font-weight: 700; -fx-text-fill: #5C4D3E;");
-        langBtn.getChildren().add(langLbl);
-
-        // Dark mode moon button with red alert dot
-        StackPane moonBtn = new StackPane();
-        moonBtn.getStyleClass().add("icon-circle-btn");
-        Label moon = new Label("🌙");
-        moon.setStyle("-fx-font-size: 13px;");
-        Region moonDot = new Region();
-        moonDot.setPrefSize(6, 6);
-        moonDot.setMaxSize(6, 6);
-        moonDot.setStyle("-fx-background-color: #EF4444; -fx-background-radius: 50%;");
-        StackPane.setAlignment(moonDot, Pos.TOP_RIGHT);
-        StackPane.setMargin(moonDot, new Insets(6, 6, 0, 0));
-        moonBtn.getChildren().addAll(moon, moonDot);
-
-        // Notification bell
-        StackPane notifBtn = new StackPane();
-        notifBtn.getStyleClass().add("icon-circle-btn");
-        Label bell = new Label("🔔");
-        bell.setStyle("-fx-font-size: 13px;");
-        notifBtn.getChildren().add(bell);
-
-        // Dark action button (matches the Sign In button style in reference banner)
         HBox userBtn = new HBox(6);
         userBtn.getStyleClass().add("dark-action-btn");
         userBtn.setAlignment(Pos.CENTER);
         Label avatar = new Label("RS");
         avatar.setStyle("-fx-font-size: 10px; -fx-font-weight: 800; -fx-background-color: #334155; -fx-text-fill: #FFFFFF; -fx-padding: 1 5; -fx-background-radius: 4;");
-        Label userName = new Label("Ratnam Singh  ▾");
+        Label userName = new Label("Ratnam Singh");
         userName.setStyle("-fx-font-size: 12px; -fx-font-weight: 700; -fx-text-fill: #FFFFFF;");
         userBtn.getChildren().addAll(avatar, userName);
 
-        rightCluster.getChildren().addAll(langBtn, moonBtn, notifBtn, userBtn);
+        rightCluster.getChildren().add(userBtn);
 
-        navBar.getChildren().addAll(logoIcon, brandBox, sep, navButtonsBox, spacer, rightCluster);
+        navBar.getChildren().addAll(leftBox, leftSpacer, navButtonsBox, rightSpacer, rightCluster);
         return navBar;
     }
 

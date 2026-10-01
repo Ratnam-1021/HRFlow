@@ -11,6 +11,10 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.CycleMethod;
+import javafx.scene.paint.LinearGradient;
+import javafx.scene.paint.RadialGradient;
+import javafx.scene.paint.Stop;
 import javafx.scene.shape.Rectangle;
 
 import java.util.List;
@@ -81,77 +85,77 @@ public class DashboardView extends VBox {
     private StackPane buildSkeuomorphicResumeCards() {
         StackPane container = new StackPane();
         container.setAlignment(Pos.CENTER_RIGHT);
-        container.setPrefSize(330, 160);
-        container.setMinSize(330, 160);
+        container.setPrefSize(310, 150);
+        container.setMaxSize(310, 150);
 
         // Card 1 (Back left - ghosted candidate profile)
         VBox card1 = new VBox(6);
-        card1.setPrefSize(100, 120);
-        card1.setMaxSize(100, 120);
-        card1.setTranslateX(-80);
-        card1.setTranslateY(12);
+        card1.setPrefSize(92, 115);
+        card1.setMaxSize(92, 115);
+        card1.setTranslateX(-58);
+        card1.setTranslateY(10);
         card1.setPadding(new Insets(10));
         card1.setStyle("-fx-background-color: rgba(255, 255, 255, 0.70); -fx-background-radius: 16px; -fx-border-color: rgba(240, 226, 212, 0.85); -fx-border-radius: 16px; -fx-border-width: 1.5px; -fx-effect: dropshadow(gaussian, rgba(160, 95, 30, 0.08), 12, 0, 0, 4);");
 
         HBox c1Top = new HBox();
         c1Top.setAlignment(Pos.CENTER_LEFT);
         Label c1Av = new Label("👤");
-        c1Av.setStyle("-fx-font-size: 14px; -fx-background-color: #FFF2E8; -fx-text-fill: #C2410C; -fx-background-radius: 50%; -fx-padding: 3;");
+        c1Av.setStyle("-fx-font-size: 13px; -fx-background-color: #FFF2E8; -fx-text-fill: #C2410C; -fx-background-radius: 50%; -fx-padding: 3;");
         c1Top.getChildren().add(c1Av);
 
-        Region c1Bar1 = new Region(); c1Bar1.setPrefSize(55, 5); c1Bar1.setMaxSize(55, 5); c1Bar1.setStyle("-fx-background-color: #E6D9CB; -fx-background-radius: 3px;");
-        Region c1Bar2 = new Region(); c1Bar2.setPrefSize(42, 4); c1Bar2.setMaxSize(42, 4); c1Bar2.setStyle("-fx-background-color: #EFE4D6; -fx-background-radius: 2px;");
-        Region c1Bar3 = new Region(); c1Bar3.setPrefSize(48, 4); c1Bar3.setMaxSize(48, 4); c1Bar3.setStyle("-fx-background-color: #F4EAE0; -fx-background-radius: 2px;");
+        Region c1Bar1 = new Region(); c1Bar1.setPrefSize(50, 5); c1Bar1.setMaxSize(50, 5); c1Bar1.setStyle("-fx-background-color: #E6D9CB; -fx-background-radius: 3px;");
+        Region c1Bar2 = new Region(); c1Bar2.setPrefSize(38, 4); c1Bar2.setMaxSize(38, 4); c1Bar2.setStyle("-fx-background-color: #EFE4D6; -fx-background-radius: 2px;");
+        Region c1Bar3 = new Region(); c1Bar3.setPrefSize(44, 4); c1Bar3.setMaxSize(44, 4); c1Bar3.setStyle("-fx-background-color: #F4EAE0; -fx-background-radius: 2px;");
         card1.getChildren().addAll(c1Top, c1Bar1, c1Bar2, c1Bar3);
 
         // Card 3 (Right - Verified candidate resume sheet)
         VBox card3 = new VBox(7);
-        card3.setPrefSize(125, 136);
-        card3.setMaxSize(125, 136);
-        card3.setTranslateX(82);
+        card3.setPrefSize(116, 132);
+        card3.setMaxSize(116, 132);
+        card3.setTranslateX(60);
         card3.setTranslateY(8);
-        card3.setPadding(new Insets(12));
+        card3.setPadding(new Insets(10));
         card3.setStyle("-fx-background-color: #FFFFFF; -fx-background-radius: 18px; -fx-border-color: #F3E6D6; -fx-border-radius: 18px; -fx-border-width: 1.5px; -fx-effect: dropshadow(gaussian, rgba(180, 105, 30, 0.14), 18, 0, 0, 6);");
 
-        Region rLine1 = new Region(); rLine1.setPrefSize(82, 5); rLine1.setMaxSize(82, 5); rLine1.setStyle("-fx-background-color: #E2D4C4; -fx-background-radius: 3px;");
-        Region rLine2 = new Region(); rLine2.setPrefSize(65, 5); rLine2.setMaxSize(65, 5); rLine2.setStyle("-fx-background-color: #EBE0D2; -fx-background-radius: 3px;");
-        Region rLine3 = new Region(); rLine3.setPrefSize(52, 5); rLine3.setMaxSize(52, 5); rLine3.setStyle("-fx-background-color: #F2E6DC; -fx-background-radius: 3px;");
+        Region rLine1 = new Region(); rLine1.setPrefSize(76, 5); rLine1.setMaxSize(76, 5); rLine1.setStyle("-fx-background-color: #E2D4C4; -fx-background-radius: 3px;");
+        Region rLine2 = new Region(); rLine2.setPrefSize(60, 5); rLine2.setMaxSize(60, 5); rLine2.setStyle("-fx-background-color: #EBE0D2; -fx-background-radius: 3px;");
+        Region rLine3 = new Region(); rLine3.setPrefSize(48, 5); rLine3.setMaxSize(48, 5); rLine3.setStyle("-fx-background-color: #F2E6DC; -fx-background-radius: 3px;");
 
         HBox chkBox = new HBox();
         chkBox.setAlignment(Pos.CENTER_RIGHT);
         chkBox.setPadding(new Insets(4, 0, 0, 0));
         StackPane badge = new StackPane();
-        badge.setPrefSize(30, 30);
-        badge.setMaxSize(30, 30);
+        badge.setPrefSize(28, 28);
+        badge.setMaxSize(28, 28);
         badge.setStyle("-fx-background-color: #FFF3EB; -fx-background-radius: 8px; -fx-border-color: #FED7AA; -fx-border-radius: 8px; -fx-border-width: 1px; -fx-effect: dropshadow(gaussian, rgba(234, 88, 12, 0.18), 6, 0, 0, 2);");
         Label chk = new Label("✓");
-        chk.setStyle("-fx-text-fill: #EA580C; -fx-font-size: 15px; -fx-font-weight: 800;");
+        chk.setStyle("-fx-text-fill: #EA580C; -fx-font-size: 14px; -fx-font-weight: 800;");
         badge.getChildren().add(chk);
         chkBox.getChildren().add(badge);
 
         card3.getChildren().addAll(rLine1, rLine2, rLine3, chkBox);
 
         // Card 2 (Center - Hero Candidate Profile Card)
-        VBox card2 = new VBox(8);
-        card2.setPrefSize(112, 148);
-        card2.setMaxSize(112, 148);
+        VBox card2 = new VBox(7);
+        card2.setPrefSize(106, 142);
+        card2.setMaxSize(106, 142);
         card2.setTranslateX(0);
         card2.setTranslateY(-4);
-        card2.setPadding(new Insets(12));
+        card2.setPadding(new Insets(10));
         card2.setStyle("-fx-background-color: #FFFFFF; -fx-background-radius: 18px; -fx-border-color: #F3E6D6; -fx-border-radius: 18px; -fx-border-width: 1.5px; -fx-effect: dropshadow(gaussian, rgba(180, 105, 30, 0.16), 22, 0, 0, 8);");
 
         HBox avBox = new HBox();
         avBox.setAlignment(Pos.CENTER);
-        avBox.setPrefSize(42, 42);
-        avBox.setMaxSize(42, 42);
-        avBox.setStyle("-fx-background-color: #FFF2E8; -fx-background-radius: 12px; -fx-border-color: #FED7AA; -fx-border-radius: 12px; -fx-border-width: 1px;");
+        avBox.setPrefSize(38, 38);
+        avBox.setMaxSize(38, 38);
+        avBox.setStyle("-fx-background-color: #FFF2E8; -fx-background-radius: 10px; -fx-border-color: #FED7AA; -fx-border-radius: 10px; -fx-border-width: 1px;");
         Label avIcon = new Label("👤");
-        avIcon.setStyle("-fx-font-size: 20px; -fx-text-fill: #EA580C;");
+        avIcon.setStyle("-fx-font-size: 18px; -fx-text-fill: #EA580C;");
         avBox.getChildren().add(avIcon);
 
-        Region line1 = new Region(); line1.setPrefSize(72, 6); line1.setMaxSize(72, 6); line1.setStyle("-fx-background-color: #E2D4C4; -fx-background-radius: 3px;");
-        Region line2 = new Region(); line2.setPrefSize(50, 5); line2.setMaxSize(50, 5); line2.setStyle("-fx-background-color: #EBE0D2; -fx-background-radius: 3px;");
-        Region line3 = new Region(); line3.setPrefSize(60, 4); line3.setMaxSize(60, 4); line3.setStyle("-fx-background-color: #F5EAE0; -fx-background-radius: 2px;");
+        Region line1 = new Region(); line1.setPrefSize(68, 5); line1.setMaxSize(68, 5); line1.setStyle("-fx-background-color: #E2D4C4; -fx-background-radius: 3px;");
+        Region line2 = new Region(); line2.setPrefSize(46, 5); line2.setMaxSize(46, 5); line2.setStyle("-fx-background-color: #EBE0D2; -fx-background-radius: 3px;");
+        Region line3 = new Region(); line3.setPrefSize(56, 4); line3.setMaxSize(56, 4); line3.setStyle("-fx-background-color: #F5EAE0; -fx-background-radius: 2px;");
         card2.getChildren().addAll(avBox, line1, line2, line3);
 
         container.getChildren().addAll(card1, card3, card2);
@@ -174,37 +178,47 @@ public class DashboardView extends VBox {
             GraphicsContext gc = getGraphicsContext2D();
             gc.clearRect(0, 0, w, h);
 
-            // Ambient soft background glow / radial sweep on right
-            gc.setFill(Color.web("#FFF3E8", 0.55));
-            gc.fillOval(w * 0.48, -h * 0.35, w * 0.60, h * 1.7);
+            // 1. Gentle ambient radial glow centered behind the cards that fades softly to transparent
+            RadialGradient ambientGlow = new RadialGradient(
+                    0, 0, 0.82, 0.5, 0.48, true, CycleMethod.NO_CYCLE,
+                    new Stop(0.0, Color.web("#FDE5D2", 0.55)),
+                    new Stop(0.55, Color.web("#FEF0E4", 0.28)),
+                    new Stop(1.0, Color.TRANSPARENT)
+            );
+            gc.setFill(ambientGlow);
+            gc.fillOval(w * 0.42, -h * 0.25, w * 0.65, h * 1.5);
 
-            // Wave 1: Gentle sweeping wave from top-right to bottom
+            // 2. Smooth organic wave sweeping from the right edge, dipping gently and curving back
+            // Fills with a linear gradient fading to transparent at all edges so there are never cut borders
+            LinearGradient waveGrad1 = new LinearGradient(
+                    0, 0.2, 1, 0.8, true, CycleMethod.NO_CYCLE,
+                    new Stop(0.0, Color.TRANSPARENT),
+                    new Stop(0.35, Color.web("#FCDBC4", 0.42)),
+                    new Stop(0.70, Color.web("#FCE8D8", 0.30)),
+                    new Stop(1.0, Color.TRANSPARENT)
+            );
             gc.beginPath();
-            gc.moveTo(w * 0.40, 0);
-            gc.bezierCurveTo(w * 0.54, h * 0.45, w * 0.50, h * 0.80, w * 0.64, h);
-            gc.lineTo(w, h);
-            gc.lineTo(w, 0);
+            gc.moveTo(w, h * 0.08);
+            gc.bezierCurveTo(w * 0.72, h * 0.12, w * 0.52, h * 0.38, w * 0.54, h * 0.62);
+            gc.bezierCurveTo(w * 0.56, h * 0.82, w * 0.72, h * 0.88, w, h * 0.82);
             gc.closePath();
-            gc.setFill(Color.web("#FDEBDC", 0.45));
+            gc.setFill(waveGrad1);
             gc.fill();
 
-            // Wave 2: Prominent organic wave behind cards
+            // 3. Second layered organic wave curve creating depth behind the 3D cards
+            LinearGradient waveGrad2 = new LinearGradient(
+                    0.2, 0.1, 0.9, 0.9, true, CycleMethod.NO_CYCLE,
+                    new Stop(0.0, Color.TRANSPARENT),
+                    new Stop(0.40, Color.web("#FAD3B8", 0.38)),
+                    new Stop(0.75, Color.web("#FDEBDC", 0.22)),
+                    new Stop(1.0, Color.TRANSPARENT)
+            );
             gc.beginPath();
-            gc.moveTo(w * 0.58, 0);
-            gc.bezierCurveTo(w * 0.70, h * 0.50, w * 0.60, h * 0.85, w * 0.76, h);
-            gc.lineTo(w, h);
-            gc.lineTo(w, 0);
+            gc.moveTo(w, h * 0.18);
+            gc.bezierCurveTo(w * 0.80, h * 0.26, w * 0.62, h * 0.48, w * 0.66, h * 0.74);
+            gc.bezierCurveTo(w * 0.70, h * 0.88, w * 0.84, h * 0.92, w, h * 0.72);
             gc.closePath();
-            gc.setFill(Color.web("#FCDBC4", 0.40));
-            gc.fill();
-
-            // Wave 3: Subtle accent wave at the bottom-right
-            gc.beginPath();
-            gc.moveTo(w * 0.68, h);
-            gc.bezierCurveTo(w * 0.80, h - 35, w * 0.88, h - 15, w, h - 42);
-            gc.lineTo(w, h);
-            gc.closePath();
-            gc.setFill(Color.web("#FAD3B8", 0.50));
+            gc.setFill(waveGrad2);
             gc.fill();
         }
 
@@ -227,7 +241,7 @@ public class DashboardView extends VBox {
         row.getChildren().addAll(
                 createMetricCard("👥", "#FFF3EB", "#EA580C", "TOTAL APPLICANTS", String.valueOf(totalCandidates > 0 ? totalCandidates : 250), "Active in database", "Total", "#FFF3EB", "#C2410C",
                         Color.web("#F6D8C2", 0.75), Color.web("#FDF0E6", 0.60)),
-                createMetricCard("👤", "#EFF6FF", "#2563EB", "SHORTLISTED", String.valueOf(shortlistedCount > 0 ? shortlistedCount : 30), "Qualified for next stage", "Qualified", "#DCFCE7", "#15803D",
+                createMetricCard("👤", "#EFF6FF", "#2563EB", "SHORTLISTED", String.valueOf(shortlistedCount > 0 ? shortlistedCount : 30), "Qualified for next stage", "Shortlisted", "#DCFCE7", "#15803D",
                         Color.web("#D8E9FE", 0.75), Color.web("#EDF4FE", 0.60)),
                 createMetricCard("🗓️", "#F5F3FF", "#7C3AED", "SCHEDULED SESSIONS", String.valueOf(scheduledCount > 0 ? scheduledCount : 8), "Upcoming interview rounds", "Interviews", "#F5F3FF", "#6D28D9",
                         Color.web("#E7DCFA", 0.75), Color.web("#F5EFFD", 0.60)),
