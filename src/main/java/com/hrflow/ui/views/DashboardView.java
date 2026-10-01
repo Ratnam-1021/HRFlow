@@ -29,6 +29,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 /**
  * Main Recruitment & Hiring Dashboard.
@@ -487,7 +488,7 @@ public class DashboardView extends VBox {
         TableView<Candidate> table = new TableView<>();
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         table.setFixedCellSize(52);
-        table.setPrefHeight(52 * 5 + 44);
+        table.setPrefHeight(52 * 7 + 44);
 
         // 1. Rank Column (#)
         TableColumn<Candidate, Integer> colRank = new TableColumn<>("#");
@@ -633,10 +634,21 @@ public class DashboardView extends VBox {
 
         table.getColumns().addAll(colRank, colCandidate, colRole, colExp, colSkills, colScore, colStatus);
 
-        List<Candidate> topCandidates = CandidateSortEngine.rankAndGetTopK(
-                context.getCandidateService().getAllCandidates(), Set.of("Java", "Docker", "Spring Boot"), 5
-        );
-        table.getItems().addAll(topCandidates);
+        List<Candidate> shortlistedCandidates = context.getCandidateService().getAllCandidates().stream()
+                .filter(c -> c.getStatus() == Candidate.CandidateStatus.SHORTLISTED)
+                .collect(Collectors.toList());
+
+        List<Candidate> displayCandidates;
+        if (!shortlistedCandidates.isEmpty()) {
+            displayCandidates = CandidateSortEngine.rankAndGetTopK(
+                    shortlistedCandidates, Set.of("Java", "Docker", "Spring Boot"), shortlistedCandidates.size()
+            );
+        } else {
+            displayCandidates = CandidateSortEngine.rankAndGetTopK(
+                    context.getCandidateService().getAllCandidates(), Set.of("Java", "Docker", "Spring Boot"), 22
+            );
+        }
+        table.getItems().addAll(displayCandidates);
 
         return table;
     }
@@ -645,7 +657,7 @@ public class DashboardView extends VBox {
         TableView<QueueInterviewScheduler.InterviewBooking> table = new TableView<>();
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         table.setFixedCellSize(52);
-        table.setPrefHeight(52 * 5 + 44);
+        table.setPrefHeight(52 * 8 + 44);
 
         // 1. Slot Index
         TableColumn<QueueInterviewScheduler.InterviewBooking, Integer> colIndex = new TableColumn<>("#");
