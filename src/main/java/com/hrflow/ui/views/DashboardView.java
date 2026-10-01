@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import com.hrflow.dsa.queue.QueueInterviewScheduler;
+import com.hrflow.service.ReportExportService;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -788,44 +789,27 @@ public class DashboardView extends VBox {
         }
 
         FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Export Scheduled Interviews (CSV)");
-        fileChooser.setInitialFileName("scheduled_interviews_summary.csv");
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV Files (*.csv)", "*.csv"));
+        fileChooser.setTitle("Export Scheduled Interviews");
+        fileChooser.setInitialFileName("candidates_ready_for_hr_interview.pdf");
+        FileChooser.ExtensionFilter pdfFilter = new FileChooser.ExtensionFilter("PDF Document (*.pdf)", "*.pdf");
+        FileChooser.ExtensionFilter csvFilter = new FileChooser.ExtensionFilter("CSV Spreadsheet (*.csv)", "*.csv");
+        fileChooser.getExtensionFilters().addAll(pdfFilter, csvFilter);
+        fileChooser.setSelectedExtensionFilter(pdfFilter);
 
         File file = fileChooser.showSaveDialog(window);
         if (file == null) return;
 
-        try (PrintWriter writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8))) {
-            String timestamp = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+        try {
+            String title = "Candidates Ready For HR Interview";
+            String purpose = "Shortlisted candidates awaiting HR evaluation";
 
-            // Dashboard Heading and Purpose
-            writer.println("Scheduled Candidate Interviews");
-            writer.println("Purpose: Upcoming interview rounds, assigned time slots, and panel reviewers");
-            writer.printf("Generated: %s | Total Scheduled Sessions: %d%n", timestamp, bookings.size());
-            writer.println();
-
-            writer.println("Slot,Time Slot,Candidate Name,Applied Role,Assigned Interviewer,Interviewer Role,Allocated Room,Status");
-            int slot = 1;
-            for (QueueInterviewScheduler.InterviewBooking b : bookings) {
-                String candidateName = b.getCandidate() != null ? b.getCandidate().getName() : "";
-                String role = b.getCandidate() != null ? b.getCandidate().getAppliedRole() : "";
-                String interviewerName = b.getInterviewer() != null ? b.getInterviewer().getName() : "";
-                String interviewerRole = b.getInterviewer() != null ? b.getInterviewer().getRole() : "";
-                String time = b.getTimeSlot() != null ? b.getTimeSlot().toString() : "";
-                String room = b.getRoom() != null ? b.getRoom() : "";
-
-                writer.printf("%d,%s,%s,%s,%s,%s,%s,%s%n",
-                        slot++,
-                        escapeCsv(time),
-                        escapeCsv(candidateName),
-                        escapeCsv(role),
-                        escapeCsv(interviewerName),
-                        escapeCsv(interviewerRole),
-                        escapeCsv(room),
-                        "SCHEDULED"
-                );
+            if (file.getName().toLowerCase().endsWith(".csv")) {
+                ReportExportService.exportScheduledToCsv(file, title, purpose, bookings);
+            } else {
+                ReportExportService.exportScheduledToPdf(file, title, purpose, bookings);
             }
-            showAlert("Export Successful", "Scheduled interviews exported successfully (" + bookings.size() + " sessions):\n" + file.getAbsolutePath());
+
+            showExportSuccess(file);
         } catch (Exception ex) {
             showAlert("Export Error", "Failed to export interview schedule: " + ex.getMessage());
         }
@@ -845,38 +829,51 @@ public class DashboardView extends VBox {
         }
 
         FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Export Top Ranked Candidates (CSV)");
-        fileChooser.setInitialFileName("top_ranked_candidates.csv");
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV Files (*.csv)", "*.csv"));
+        fileChooser.setTitle("Export Candidates To Be Shortlisted");
+        fileChooser.setInitialFileName("candidates_to_be_shortlisted.pdf");
+        FileChooser.ExtensionFilter pdfFilter = new FileChooser.ExtensionFilter("PDF Document (*.pdf)", "*.pdf");
+        FileChooser.ExtensionFilter csvFilter = new FileChooser.ExtensionFilter("CSV Spreadsheet (*.csv)", "*.csv");
+        fileChooser.getExtensionFilters().addAll(pdfFilter, csvFilter);
+        fileChooser.setSelectedExtensionFilter(pdfFilter);
 
         File file = fileChooser.showSaveDialog(window);
         if (file == null) return;
 
-        try (PrintWriter writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8))) {
-            String timestamp = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+        try {
+            String title = "Candidates To Be Shortlisted for HR Interview";
+            String purpose = "Shortlisted candidates awaiting technical evaluation & hiring decisions";
 
-            // Dashboard Heading and Purpose
-            writer.println("Top Ranked Candidates");
-            writer.println("Purpose: Ready for Hiring Manager Reviews (Shortlisted candidates awaiting technical evaluation & hiring decisions)");
-            writer.printf("Generated: %s | Total Candidates: %d%n", timestamp, candidates.size());
-            writer.println();
-
-            writer.println("Rank,Candidate Name,Applied Role,Experience (Years),Overall Score (%),Status");
-            int rank = 1;
-            for (Candidate c : candidates) {
-                writer.printf("%d,%s,%s,%.1f,%.1f%%,%s%n",
-                        rank++,
-                        escapeCsv(c.getName()),
-                        escapeCsv(c.getAppliedRole()),
-                        c.getExperienceYears(),
-                        c.getOverallScore(),
-                        c.getStatus() != null ? c.getStatus().name() : "SHORTLISTED"
-                );
+            if (file.getName().toLowerCase().endsWith(".csv")) {
+                ReportExportService.exportCandidatesToCsv(file, title, purpose, candidates);
+            } else {
+                ReportExportService.exportCandidatesToPdf(file, title, purpose, candidates);
             }
-            showAlert("Export Successful", "Top Ranked Candidates exported successfully (" + candidates.size() + " candidates):\n" + file.getAbsolutePath());
+
+            showExportSuccess(file);
         } catch (Exception ex) {
             showAlert("Export Error", "Failed to export candidates: " + ex.getMessage());
         }
+    }
+
+    private void showExportSuccess(File file) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Export Successful");
+        alert.setHeaderText("Report Exported Successfully");
+        alert.setContentText("File saved to:\n" + file.getAbsolutePath());
+
+        ButtonType openBtn = new ButtonType("Open Report");
+        ButtonType closeBtn = new ButtonType("Close", ButtonBar.ButtonData.CANCEL_CLOSE);
+        alert.getButtonTypes().setAll(openBtn, closeBtn);
+
+        alert.showAndWait().ifPresent(btn -> {
+            if (btn == openBtn) {
+                try {
+                    if (java.awt.Desktop.isDesktopSupported()) {
+                        java.awt.Desktop.getDesktop().open(file);
+                    }
+                } catch (Exception ignored) {}
+            }
+        });
     }
 
     private static String escapeCsv(String val) {

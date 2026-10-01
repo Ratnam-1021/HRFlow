@@ -10,6 +10,7 @@ import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.*;
+import com.hrflow.service.ReportExportService;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
 
@@ -369,41 +370,54 @@ public class RecruitmentView extends VBox {
         }
 
         FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Export Candidates Summary (CSV)");
-        fileChooser.setInitialFileName("candidates_pipeline_summary.csv");
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV Files (*.csv)", "*.csv"));
+        fileChooser.setTitle("Export Candidate Pipeline");
+        fileChooser.setInitialFileName("candidates_pipeline.pdf");
+        FileChooser.ExtensionFilter pdfFilter = new FileChooser.ExtensionFilter("PDF Document (*.pdf)", "*.pdf");
+        FileChooser.ExtensionFilter csvFilter = new FileChooser.ExtensionFilter("CSV Spreadsheet (*.csv)", "*.csv");
+        fileChooser.getExtensionFilters().addAll(pdfFilter, csvFilter);
+        fileChooser.setSelectedExtensionFilter(pdfFilter);
 
         Window window = getScene() != null ? getScene().getWindow() : null;
         File file = fileChooser.showSaveDialog(window);
         if (file == null) return;
 
-        try (PrintWriter writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8))) {
-            String timestamp = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+        try {
             String activeRole = roleFilterCombo.getValue() != null ? roleFilterCombo.getValue() : "All Roles";
+            String title = "Candidates To Be Shortlisted for HR Interview";
+            String purpose = "Shortlisted candidates awaiting technical evaluation & hiring decisions (Role: " + activeRole + ")";
 
-            // Heading & Purpose
-            writer.println("Candidate Pipeline Summary");
-            writer.println("Purpose: Evaluated Candidate Pool & Skill-Matching Ranking (Role Filter: " + activeRole + ")");
-            writer.printf("Generated: %s | Total Candidates: %d%n", timestamp, candidateData.size());
-            writer.println();
-
-            writer.println("Rank,Candidate Name,Applied Role,Experience (Years),Overall Score (%),Status");
-            int rank = 1;
-            for (Candidate c : candidateData) {
-                writer.printf("%d,%s,%s,%.1f,%.1f%%,%s%n",
-                        rank++,
-                        escapeCsv(c.getName()),
-                        escapeCsv(c.getAppliedRole()),
-                        c.getExperienceYears(),
-                        c.getOverallScore(),
-                        c.getStatus() != null ? c.getStatus().name() : "APPLIED"
-                );
+            if (file.getName().toLowerCase().endsWith(".csv")) {
+                ReportExportService.exportCandidatesToCsv(file, title, purpose, candidateData);
+            } else {
+                ReportExportService.exportCandidatesToPdf(file, title, purpose, candidateData);
             }
+
             historyStatusLabel.setText(String.format("Exported %d candidates to %s", candidateData.size(), file.getName()));
-            showAlert("Export Successful", "Candidate summary exported successfully (" + candidateData.size() + " candidates):\n" + file.getAbsolutePath());
+            showExportSuccess(file);
         } catch (Exception ex) {
             showAlert("Export Error", "Failed to export candidates: " + ex.getMessage());
         }
+    }
+
+    private void showExportSuccess(File file) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Export Successful");
+        alert.setHeaderText("Report Exported Successfully");
+        alert.setContentText("File saved to:\n" + file.getAbsolutePath());
+
+        ButtonType openBtn = new ButtonType("Open Report");
+        ButtonType closeBtn = new ButtonType("Close", ButtonBar.ButtonData.CANCEL_CLOSE);
+        alert.getButtonTypes().setAll(openBtn, closeBtn);
+
+        alert.showAndWait().ifPresent(btn -> {
+            if (btn == openBtn) {
+                try {
+                    if (java.awt.Desktop.isDesktopSupported()) {
+                        java.awt.Desktop.getDesktop().open(file);
+                    }
+                } catch (Exception ignored) {}
+            }
+        });
     }
 
     private static String escapeCsv(String val) {
