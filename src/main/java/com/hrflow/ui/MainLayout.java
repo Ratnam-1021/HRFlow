@@ -20,43 +20,83 @@ public class MainLayout extends BorderPane {
     private final Map<String, Button> navButtons = new HashMap<>();
 
     public MainLayout() {
-        setTop(buildTopNavBar());
+        VBox topWrapper = new VBox(buildTopNavBar());
+        topWrapper.setPadding(new Insets(14, 24, 0, 24));
+        setTop(topWrapper);
         setCenter(contentArea);
 
         switchView("dashboard");
     }
 
     private HBox buildTopNavBar() {
-        HBox navBar = new HBox(20);
+        HBox navBar = new HBox(16);
         navBar.getStyleClass().add("top-navbar");
         navBar.setAlignment(Pos.CENTER_LEFT);
 
+        // Logo icon box
+        HBox logoIcon = new HBox(2.5);
+        logoIcon.getStyleClass().add("logo-icon-box");
+        logoIcon.setAlignment(Pos.BOTTOM_CENTER);
+        logoIcon.setPrefSize(32, 32);
+        Region b1 = new Region(); b1.setPrefSize(3.5, 10); b1.setStyle("-fx-background-color: #EA580C; -fx-background-radius: 2;");
+        Region b2 = new Region(); b2.setPrefSize(3.5, 16); b2.setStyle("-fx-background-color: #EA580C; -fx-background-radius: 2;");
+        Region b3 = new Region(); b3.setPrefSize(3.5, 12); b3.setStyle("-fx-background-color: #EA580C; -fx-background-radius: 2;");
+        logoIcon.getChildren().addAll(b1, b2, b3);
+
         // Brand on the left
-        VBox brandBox = new VBox(1);
+        VBox brandBox = new VBox(0);
         brandBox.setAlignment(Pos.CENTER_LEFT);
-        Label logo = new Label("HRFlow");
-        logo.getStyleClass().add("logo-text");
+        HBox brandTitleBox = new HBox(0);
+        Label hrLbl = new Label("HR");
+        hrLbl.setStyle("-fx-font-size: 19px; -fx-font-weight: 800; -fx-text-fill: #1A110B;");
+        Label flowLbl = new Label("Flow");
+        flowLbl.setStyle("-fx-font-size: 19px; -fx-font-weight: 800; -fx-text-fill: #EA580C;");
+        brandTitleBox.getChildren().addAll(hrLbl, flowLbl);
+
         Label sub = new Label("RECRUITMENT & HIRING");
         sub.getStyleClass().add("logo-subtext");
-        brandBox.getChildren().addAll(logo, sub);
+        brandBox.getChildren().addAll(brandTitleBox, sub);
 
         // Vertical divider
         javafx.scene.control.Separator sep = new javafx.scene.control.Separator(javafx.geometry.Orientation.VERTICAL);
-        sep.setPrefHeight(26);
+        sep.setPrefHeight(24);
         sep.setStyle("-fx-background-color: #EFE4D6;");
 
         // Horizontal navigation tabs with rounded rectangle cards
-        HBox navButtonsBox = new HBox(10);
+        HBox navButtonsBox = new HBox(8);
         navButtonsBox.setAlignment(Pos.CENTER_LEFT);
-        addNavItem(navButtonsBox, "dashboard", "📊  Dashboard");
-        addNavItem(navButtonsBox, "recruitment", "👥  Candidate Pipeline");
-        addNavItem(navButtonsBox, "scheduling", "🗓️  Interview Scheduler");
-        addNavItem(navButtonsBox, "history", "📜  Activity & Audit Log");
+        addNavItem(navButtonsBox, "dashboard", "📊 Dashboard");
+        addNavItem(navButtonsBox, "recruitment", "👥 Candidate Pipeline");
+        addNavItem(navButtonsBox, "scheduling", "🗓️ Interview Scheduler");
+        addNavItem(navButtonsBox, "history", "📄 Activity & Audit Log");
 
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        navBar.getChildren().addAll(brandBox, sep, navButtonsBox, spacer);
+        // Right side: Notification bell and User Profile pill
+        StackPane notifBtn = new StackPane();
+        notifBtn.getStyleClass().add("icon-circle-btn");
+        Label bell = new Label("🔔");
+        bell.setStyle("-fx-font-size: 13px;");
+        Region notifDot = new Region();
+        notifDot.setPrefSize(6, 6);
+        notifDot.setMaxSize(6, 6);
+        notifDot.setStyle("-fx-background-color: #EA580C; -fx-background-radius: 50%;");
+        StackPane.setAlignment(notifDot, Pos.TOP_RIGHT);
+        StackPane.setMargin(notifDot, new Insets(6, 6, 0, 0));
+        notifBtn.getChildren().addAll(bell, notifDot);
+
+        HBox userPill = new HBox(8);
+        userPill.getStyleClass().add("user-profile-pill");
+        userPill.setAlignment(Pos.CENTER_LEFT);
+        Label avatar = new Label("RS");
+        avatar.getStyleClass().add("avatar-circle");
+        avatar.setStyle("-fx-font-size: 10.5px; -fx-font-weight: 700; -fx-text-fill: #5C4D3E;");
+        Label userName = new Label("Ratnam Singh  ▾");
+        userName.setStyle("-fx-font-size: 12px; -fx-font-weight: 600; -fx-text-fill: #2B1E13;");
+        userPill.getChildren().addAll(avatar, userName);
+
+        navBar.getChildren().addAll(logoIcon, brandBox, sep, navButtonsBox, spacer, notifBtn, userPill);
         return navBar;
     }
 

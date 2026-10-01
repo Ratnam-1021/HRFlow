@@ -69,12 +69,12 @@ Instead of relying on generic frameworks or standard CRUD abstractions, every co
 
 ---
 
-## 🎨 Executive Warm UI Palette
+## 🎨 Executive Warm UI Palette & Modern Layout
 
 HRFlow features a **soft, smooth, light yellowish-orange premium aesthetic** designed for executive clarity, comfortable all-day usage, and warm visual harmony:
 
 * **Canvas & Backdrop**: Soft Warm Sandstone / Ivory (`#FAF5ED`)
-* **Navigation Sidebar**: Warm Cream Sandstone (`#F6EDE0`) with delicate bordering (`#EADECE`)
+* **Top Navigation Bar**: Floating white card with orange brand icon, title, rounded rectangle card selection buttons, notification indicator, and executive user profile pill
 * **Cards & Surfaces**: Warm White (`#FFFFFF`) with subtle warm borders (`#EFE4D6`) and gentle amber drop shadows
 * **Primary Accents**: Rich Warm Amber to Burnt Orange (`#EA580C` to `#D97706`)
 * **Headings & Hierarchy**: Deep Warm Espresso (`#261B12`)
