@@ -79,6 +79,53 @@ public class CandidateService {
     }
 
     /**
+     * Retrieves unique company released job roles present in the applicant pool.
+     */
+    public List<String> getAvailableRoles() {
+        Set<String> roles = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+        for (Candidate c : candidates) {
+            if (c.getAppliedRole() != null && !c.getAppliedRole().isBlank()) {
+                roles.add(c.getAppliedRole().trim());
+            }
+        }
+        List<String> list = new ArrayList<>();
+        list.add("All Roles");
+        list.addAll(roles);
+        return list;
+    }
+
+    /**
+     * Filters candidates by company released role name and optionally ranks by required skills.
+     */
+    public List<Candidate> filterCandidates(String role, Set<String> requiredSkills, int topK) {
+        List<Candidate> pool = new ArrayList<>();
+        boolean filterRole = role != null && !role.equalsIgnoreCase("All Roles") && !role.isBlank();
+
+        for (Candidate c : candidates) {
+            if (!filterRole || c.getAppliedRole().equalsIgnoreCase(role.trim())) {
+                pool.add(c);
+            }
+        }
+
+        if (requiredSkills != null && !requiredSkills.isEmpty()) {
+            return CandidateSortEngine.rankAndGetTopK(pool, requiredSkills, topK > 0 ? topK : pool.size());
+        }
+
+        List<Candidate> sorted = CandidateSortEngine.sortByInsertionSort(pool);
+        if (topK > 0 && sorted.size() > topK) {
+            return new ArrayList<>(sorted.subList(0, topK));
+        }
+        return sorted;
+    }
+
+    /**
+     * Filters candidates purely by company role name.
+     */
+    public List<Candidate> getCandidatesByRole(String role) {
+        return filterCandidates(role, Collections.emptySet(), -1);
+    }
+
+    /**
      * Updates candidate status with Undo Stack tracking.
      */
     public void updateCandidateStatus(Candidate candidate, Candidate.CandidateStatus newStatus) {

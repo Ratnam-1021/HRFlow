@@ -46,6 +46,9 @@ public class DatabaseManager {
 
         try (Connection conn = getConnection(); Statement stmt = conn.createStatement()) {
             stmt.execute(sqlCandidates);
+            // Ensure company released roles are standard
+            stmt.executeUpdate("UPDATE candidates SET applied_role = 'Software Developer' WHERE applied_role LIKE '%Java%'");
+            stmt.executeUpdate("UPDATE candidates SET applied_role = 'Software Developer Testing' WHERE skills LIKE '%QA%' OR skills LIKE '%Selenium%' OR skills LIKE '%TestNG%'");
         } catch (SQLException e) {
             System.err.println("Database initialization error: " + e.getMessage());
         }
@@ -80,7 +83,7 @@ public class DatabaseManager {
                 {"Machine Learning", "Python", "PyTorch", "SQL", "Data Science"},
                 {"QA", "Selenium", "Java", "TestNG", "JIRA"}
         };
-        String[] roles = {"Senior Java Developer", "Java Software Engineer", "Full Stack Developer", "Backend Engineer", "Cloud Architect"};
+        String[] roles = {"Software Developer", "Software Developer Testing", "Full Stack Developer", "Backend Engineer", "Cloud Architect"};
 
         Random rand = new Random(42); // deterministic seed
         for (int i = 1; i <= 250; i++) {
@@ -89,9 +92,15 @@ public class DatabaseManager {
             String lName = lastNames[rand.nextInt(lastNames.length)];
             String name = fName + " " + lName;
             String email = fName.toLowerCase() + "." + lName.toLowerCase() + i + "@applicant.net";
-            String role = roles[rand.nextInt(roles.length)];
             String[] chosenSkills = skillSets[rand.nextInt(skillSets.length)];
             Set<String> skills = new HashSet<>(Arrays.asList(chosenSkills));
+
+            String role;
+            if (skills.contains("QA") || skills.contains("Selenium") || skills.contains("TestNG")) {
+                role = "Software Developer Testing";
+            } else {
+                role = roles[rand.nextInt(roles.length)];
+            }
 
             double exp = 1.0 + rand.nextDouble() * 9.0;
             double edu = 60.0 + rand.nextDouble() * 38.0;

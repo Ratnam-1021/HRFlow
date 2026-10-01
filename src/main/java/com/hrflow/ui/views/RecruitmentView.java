@@ -21,6 +21,7 @@ public class RecruitmentView extends VBox {
     private final AppContext context = AppContext.getInstance();
     private final ObservableList<Candidate> candidateData = FXCollections.observableArrayList();
     private final TableView<Candidate> table = new TableView<>();
+    private final ComboBox<String> roleFilterCombo = new ComboBox<>();
     private final TextField skillSearchField = new TextField();
     private final FlowPane suggestionsPane = new FlowPane();
     private final FlowPane activeSkillsFilter = new FlowPane();
@@ -46,7 +47,7 @@ public class RecruitmentView extends VBox {
         VBox titleBox = new VBox(4);
         Label title = new Label("Candidate Pipeline & Screening");
         title.setStyle("-fx-font-size: 22px; -fx-font-weight: 800; -fx-text-fill: #261B12;");
-        Label subtitle = new Label("Search applicants by skills, rank candidates by overall fit score, and manage shortlisting status.");
+        Label subtitle = new Label("Filter by company released job roles, search applicant skills, rank by qualification score, and manage candidate status.");
         subtitle.setStyle("-fx-font-size: 13px; -fx-text-fill: #786958;");
         titleBox.getChildren().addAll(title, subtitle);
         getChildren().add(titleBox);
@@ -56,30 +57,40 @@ public class RecruitmentView extends VBox {
         VBox controlCard = new VBox(12);
         controlCard.getStyleClass().add("glass-card");
 
-        HBox row1 = new HBox(14);
+        HBox row1 = new HBox(12);
         row1.setAlignment(Pos.CENTER_LEFT);
+
+        // Company Released Role Filter
+        VBox roleBox = new VBox(4);
+        Label roleLabel = new Label("Company Released Role:");
+        roleLabel.setStyle("-fx-font-size: 12px; -fx-font-weight: 700; -fx-text-fill: #5C4D3E;");
+        roleFilterCombo.getItems().setAll(context.getCandidateService().getAvailableRoles());
+        roleFilterCombo.setValue("All Roles");
+        roleFilterCombo.setPrefWidth(210);
+        roleFilterCombo.setOnAction(e -> applyFilters());
+        roleBox.getChildren().addAll(roleLabel, roleFilterCombo);
 
         VBox searchBox = new VBox(4);
         HBox.setHgrow(searchBox, Priority.ALWAYS);
         Label searchLabel = new Label("Search by Skill:");
         searchLabel.setStyle("-fx-font-size: 12px; -fx-font-weight: 700; -fx-text-fill: #5C4D3E;");
 
-        skillSearchField.setPromptText("Type a skill (e.g. Java, Python, React, SQL, AWS)...");
+        skillSearchField.setPromptText("Type a skill (e.g. Java, Python, React, SQL, QA, Selenium)...");
         skillSearchField.getStyleClass().add("search-field");
         skillSearchField.textProperty().addListener((obs, oldVal, newVal) -> updateLinearSuggestions(newVal));
 
         searchBox.getChildren().addAll(searchLabel, skillSearchField);
 
         VBox spinnerBox = new VBox(4);
-        Label spinnerLabel = new Label("Top Candidates:");
+        Label spinnerLabel = new Label("Show Top:");
         spinnerLabel.setStyle("-fx-font-size: 12px; -fx-font-weight: 700; -fx-text-fill: #5C4D3E;");
-        topKSpinner.setPrefWidth(90);
+        topKSpinner.setPrefWidth(85);
         spinnerBox.getChildren().addAll(spinnerLabel, topKSpinner);
 
         Button rankBtn = new Button("⚡ Rank Candidates");
         rankBtn.getStyleClass().add("btn-primary");
-        rankBtn.setStyle("-fx-padding: 9 16;");
-        rankBtn.setOnAction(e -> runSelectionSortRanking());
+        rankBtn.setStyle("-fx-padding: 9 14;");
+        rankBtn.setOnAction(e -> applyFilters());
 
         Button insertionBtn = new Button("Sort by Score");
         insertionBtn.getStyleClass().add("btn-secondary");
@@ -96,7 +107,7 @@ public class RecruitmentView extends VBox {
         resetBtn.getStyleClass().add("btn-secondary");
         resetBtn.setOnAction(e -> resetFilters());
 
-        row1.getChildren().addAll(searchBox, spinnerBox, rankBtn, insertionBtn, undoBtn, redoBtn, resetBtn);
+        row1.getChildren().addAll(roleBox, searchBox, spinnerBox, rankBtn, insertionBtn, undoBtn, redoBtn, resetBtn);
 
         // Autocomplete suggestions chip bar
         suggestionsPane.setHgap(8);
@@ -138,14 +149,14 @@ public class RecruitmentView extends VBox {
     private void addFilterSkill(String skill) {
         if (selectedFilterSkills.add(skill)) {
             renderFilterChips();
-            runSelectionSortRanking();
+            applyFilters();
         }
     }
 
     private void removeFilterSkill(String skill) {
         selectedFilterSkills.remove(skill);
         renderFilterChips();
-        runSelectionSortRanking();
+        applyFilters();
     }
 
     private void renderFilterChips() {
@@ -274,18 +285,23 @@ public class RecruitmentView extends VBox {
         getChildren().add(table);
     }
 
-    private void runSelectionSortRanking() {
+    private void applyFilters() {
+        String role = roleFilterCombo.getValue();
         int topK = topKSpinner.getValue();
-        Set<String> skills = selectedFilterSkills.isEmpty() ? Set.of("Java", "SQL") : selectedFilterSkills;
-        List<Candidate> ranked = context.getCandidateService().rankCandidates(skills, topK);
-        candidateData.setAll(ranked);
-        historyStatusLabel.setText(String.format("Displaying top %d qualified candidates by profile match.", ranked.size()));
+        List<Candidate> filtered = context.getCandidateService().filterCandidates(role, selectedFilterSkills, topK);
+        candidateData.setAll(filtered);
+
+        String roleText = (role != null && !role.equals("All Roles")) ? " for '" + role + "'" : "";
+        String skillText = !selectedFilterSkills.isEmpty() ? " with skills [" + String.join(", ", selectedFilterSkills) + "]" : "";
+        historyStatusLabel.setText(String.format("Displaying %d candidates%s%s.", filtered.size(), roleText, skillText));
     }
 
     private void runInsertionSort() {
-        List<Candidate> sorted = context.getCandidateService().getCandidatesSortedByInsertionSort();
-        candidateData.setAll(sorted);
-        historyStatusLabel.setText(String.format("Sorted %d candidates by qualification score.", sorted.size()));
+        String role = roleFilterCombo.getValue();
+        List<Candidate> pool = context.getCandidateService().filterCandidates(role, Collections.emptySet(), -1);
+        candidateData.setAll(pool);
+        String roleText = (role != null && !role.equals("All Roles")) ? " in '" + role + "'" : "";
+        historyStatusLabel.setText(String.format("Sorted %d candidates%s by qualification score.", pool.size(), roleText));
     }
 
     private void handleUndo() {
@@ -318,9 +334,15 @@ public class RecruitmentView extends VBox {
 
     private void loadAllCandidates() {
         candidateData.setAll(context.getCandidateService().getAllCandidates());
+        List<String> roles = context.getCandidateService().getAvailableRoles();
+        roleFilterCombo.getItems().setAll(roles);
+        if (roleFilterCombo.getValue() == null || !roles.contains(roleFilterCombo.getValue())) {
+            roleFilterCombo.setValue("All Roles");
+        }
     }
 
     private void resetFilters() {
+        roleFilterCombo.setValue("All Roles");
         selectedFilterSkills.clear();
         activeSkillsFilter.getChildren().clear();
         suggestionsPane.getChildren().clear();

@@ -143,4 +143,29 @@ public class RecruitmentSimplifiedTestSuite {
         assertNotNull(redone);
         assertEquals(Candidate.CandidateStatus.SHORTLISTED, c.getStatus());
     }
+
+    @Test
+    @DisplayName("Company Released Role Filtering (Software Developer, Software Developer Testing)")
+    void testCompanyReleasedRoleFilter() {
+        Candidate dev = new Candidate("C1", "Aman", "a@test.com", "Software Developer", Set.of("Java", "Spring Boot"), 3, 80, 80, 80);
+        Candidate qa = new Candidate("C2", "Priya", "p@test.com", "Software Developer Testing", Set.of("Selenium", "TestNG"), 4, 85, 85, 85);
+        Candidate fullStack = new Candidate("C3", "Rohan", "r@test.com", "Full Stack Developer", Set.of("React", "Node.js"), 2, 75, 75, 75);
+
+        List<Candidate> all = List.of(dev, qa, fullStack);
+
+        // Filter purely by role
+        List<Candidate> devOnly = all.stream().filter(c -> c.getAppliedRole().equalsIgnoreCase("Software Developer")).toList();
+        assertEquals(1, devOnly.size());
+        assertEquals("Aman", devOnly.get(0).getName());
+
+        List<Candidate> qaOnly = all.stream().filter(c -> c.getAppliedRole().equalsIgnoreCase("Software Developer Testing")).toList();
+        assertEquals(1, qaOnly.size());
+        assertEquals("Priya", qaOnly.get(0).getName());
+
+        // Verify multi-role collection
+        Set<String> roles = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+        all.forEach(c -> roles.add(c.getAppliedRole()));
+        assertTrue(roles.contains("Software Developer"));
+        assertTrue(roles.contains("Software Developer Testing"));
+    }
 }
