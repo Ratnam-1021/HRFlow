@@ -15,6 +15,7 @@ import java.util.function.Consumer;
 
 /**
  * Main Recruitment & Hiring Dashboard.
+ * Soft Warm Light Yellowish-Orange Theme.
  */
 public class DashboardView extends VBox {
     private final AppContext context = AppContext.getInstance();
@@ -35,10 +36,10 @@ public class DashboardView extends VBox {
         header.setAlignment(Pos.CENTER_LEFT);
 
         VBox titleBox = new VBox(4);
-        Label title = new Label("Recruitment & Hiring Subsystem 👋");
-        title.setStyle("-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #ffffff;");
+        Label title = new Label("Recruitment & Hiring Subsystem");
+        title.setStyle("-fx-font-size: 22px; -fx-font-weight: 800; -fx-text-fill: #261B12;");
         Label subtitle = new Label("Algorithmic talent acquisition pipeline: Indexing (HashMap), Search, Ranking (Selection Sort), Queue Scheduling, and Stack History.");
-        subtitle.setStyle("-fx-font-size: 13px; -fx-text-fill: #94a3b8;");
+        subtitle.setStyle("-fx-font-size: 13px; -fx-text-fill: #786958;");
         titleBox.getChildren().addAll(title, subtitle);
 
         Region spacer = new Region();
@@ -108,7 +109,7 @@ public class DashboardView extends VBox {
 
         HBox leftHeader = new HBox();
         Label leftTitle = new Label("Top Ranked Candidates (Selection Sort)");
-        leftTitle.setStyle("-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #ffffff;");
+        leftTitle.setStyle("-fx-font-size: 15px; -fx-font-weight: 700; -fx-text-fill: #261B12;");
         Region sp1 = new Region();
         HBox.setHgrow(sp1, Priority.ALWAYS);
         Button viewAllBtn = new Button("View Pipeline →");
@@ -126,19 +127,19 @@ public class DashboardView extends VBox {
         rightCard.setPrefWidth(420);
 
         Label rightTitle = new Label("Subsystem Architecture & DSA Flow");
-        rightTitle.setStyle("-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #ffffff;");
+        rightTitle.setStyle("-fx-font-size: 15px; -fx-font-weight: 700; -fx-text-fill: #261B12;");
 
         VBox p1 = createArchitectureTile("1. Recruitment (Search & Ranking)",
                 "• HashMap: O(1) Candidate skill lookup\n• Linear Search: Prefix autocomplete filtering\n• Binary Search: O(log N) sorted ID lookup\n• Sorting: Selection Sort (Top-K) & Insertion Sort",
-                "-fx-border-color: #6366f1;");
+                "-fx-border-color: #EA580C;");
 
         VBox p2 = createArchitectureTile("2. Scheduling (Queue Engine)",
                 "• Queue (FIFO): First-Come, First-Served interviews\n• Priority Queue: High-score applicants first\n• Availability Check: Instant slot & room collision check",
-                "-fx-border-color: #10b981;");
+                "-fx-border-color: #D97706;");
 
         VBox p3 = createArchitectureTile("3. History (Stack Engine)",
                 "• Dual-Stack: LIFO Undo and Redo\n• Full Audit Trail: Trace status modifications in real time",
-                "-fx-border-color: #f59e0b;");
+                "-fx-border-color: #C2410C;");
 
         rightCard.getChildren().addAll(rightTitle, p1, p2, p3);
 
@@ -147,13 +148,13 @@ public class DashboardView extends VBox {
     }
 
     private VBox createArchitectureTile(String heading, String body, String borderStyle) {
-        VBox tile = new VBox(4);
-        tile.setStyle("-fx-background-color: #1a253c; -fx-padding: 12; -fx-background-radius: 8; -fx-border-width: 0 0 0 3; " + borderStyle);
+        VBox tile = new VBox(6);
+        tile.setStyle("-fx-background-color: #FBF6EE; -fx-padding: 12; -fx-background-radius: 8; -fx-border-width: 0 0 0 3.5; " + borderStyle);
         Label h = new Label(heading);
-        h.setStyle("-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #ffffff;");
+        h.setStyle("-fx-font-size: 13px; -fx-font-weight: 700; -fx-text-fill: #2B1E13;");
         Label b = new Label(body);
         b.setWrapText(true);
-        b.setStyle("-fx-font-size: 11.5px; -fx-text-fill: #cbd5e1; -fx-line-spacing: 2;");
+        b.setStyle("-fx-font-size: 11.5px; -fx-text-fill: #5E4E3F; -fx-line-spacing: 2;");
         tile.getChildren().addAll(h, b);
         return tile;
     }
@@ -178,7 +179,7 @@ public class DashboardView extends VBox {
                     setText(null);
                 } else {
                     setText(String.format("%.1f %%", score));
-                    setStyle("-fx-font-weight: bold; -fx-text-fill: " + (score >= 85 ? "#34d399" : "#fbbf24"));
+                    setStyle("-fx-font-weight: 700; -fx-text-fill: " + (score >= 85 ? "#15803D" : "#B45309"));
                 }
             }
         });

@@ -13,7 +13,7 @@ import javafx.scene.layout.*;
 
 /**
  * Subsystem Pillar 3: Action History & Dual-Stack Undo / Redo Hub.
- * Visualizes the LIFO Undo Stack, Redo Stack, and full audit log.
+ * Soft Warm Light Yellowish-Orange Theme.
  */
 public class HistoryView extends VBox {
     private final AppContext context = AppContext.getInstance();
@@ -38,9 +38,9 @@ public class HistoryView extends VBox {
     private void buildHeader() {
         VBox titleBox = new VBox(4);
         Label title = new Label("Recruitment Action History & Stack Control");
-        title.setStyle("-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #ffffff;");
+        title.setStyle("-fx-font-size: 22px; -fx-font-weight: 800; -fx-text-fill: #261B12;");
         Label subtitle = new Label("Dual-Stack LIFO architecture tracking candidate status transitions with reversible Undo & Redo operations.");
-        subtitle.setStyle("-fx-font-size: 13px; -fx-text-fill: #94a3b8;");
+        subtitle.setStyle("-fx-font-size: 13px; -fx-text-fill: #786958;");
         titleBox.getChildren().addAll(title, subtitle);
         getChildren().add(titleBox);
     }
@@ -51,8 +51,8 @@ public class HistoryView extends VBox {
         bar.setAlignment(Pos.CENTER_LEFT);
 
         VBox statsBox = new VBox(4);
-        undoCountLabel.setStyle("-fx-font-size: 12.5px; -fx-font-weight: bold; -fx-text-fill: #34d399;");
-        redoCountLabel.setStyle("-fx-font-size: 12.5px; -fx-font-weight: bold; -fx-text-fill: #38bdf8;");
+        undoCountLabel.setStyle("-fx-font-size: 12.5px; -fx-font-weight: 700; -fx-text-fill: #15803D;");
+        redoCountLabel.setStyle("-fx-font-size: 12.5px; -fx-font-weight: 700; -fx-text-fill: #C2410C;");
         statsBox.getChildren().addAll(undoCountLabel, redoCountLabel);
 
         Region spacer = new Region();
@@ -83,7 +83,7 @@ public class HistoryView extends VBox {
         TableColumn<HRAction, String> colTime = new TableColumn<>("Time");
         colTime.setCellValueFactory(new PropertyValueFactory<>("formattedTime"));
         colTime.setMaxWidth(110);
-        colTime.setStyle("-fx-text-fill: #94a3b8;");
+        colTime.setStyle("-fx-text-fill: #786958; -fx-font-weight: 600;");
 
         TableColumn<HRAction, HRAction.ActionType> colType = new TableColumn<>("Action Type");
         colType.setCellValueFactory(new PropertyValueFactory<>("type"));
@@ -96,10 +96,13 @@ public class HistoryView extends VBox {
                     setGraphic(null);
                 } else {
                     Label badge = new Label(type.name());
-                    badge.setStyle("-fx-font-size: 11px; -fx-padding: 3 8; -fx-background-radius: 8; -fx-font-weight: bold; " +
-                            (type == HRAction.ActionType.SHORTLIST ? "-fx-background-color: rgba(16,185,129,0.2); -fx-text-fill: #34d399;" :
-                             type == HRAction.ActionType.REJECT ? "-fx-background-color: rgba(244,63,94,0.2); -fx-text-fill: #fb7185;" :
-                             "-fx-background-color: rgba(99,102,241,0.2); -fx-text-fill: #818cf8;"));
+                    if (type == HRAction.ActionType.SHORTLIST) {
+                        badge.setStyle("-fx-background-color: #DCFCE7; -fx-text-fill: #15803D; -fx-font-weight: 700; -fx-font-size: 11px; -fx-padding: 3 8; -fx-background-radius: 8;");
+                    } else if (type == HRAction.ActionType.REJECT) {
+                        badge.setStyle("-fx-background-color: #FFE4E6; -fx-text-fill: #BE123C; -fx-font-weight: 700; -fx-font-size: 11px; -fx-padding: 3 8; -fx-background-radius: 8;");
+                    } else {
+                        badge.setStyle("-fx-background-color: #FEF3C7; -fx-text-fill: #B45309; -fx-font-weight: 700; -fx-font-size: 11px; -fx-padding: 3 8; -fx-background-radius: 8;");
+                    }
                     setGraphic(badge);
                 }
             }

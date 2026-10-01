@@ -15,10 +15,7 @@ import java.util.*;
 
 /**
  * Recruitment & Hiring View.
- * Architecture:
- * - Candidates: HashMap indexing + Linear Search Autocomplete + Binary Search
- * - Ranking: Selection Sort (Top-K) & Insertion Sort
- * - History: Dual-Stack LIFO Undo / Redo
+ * Soft Warm Light Yellowish-Orange Theme.
  */
 public class RecruitmentView extends VBox {
     private final AppContext context = AppContext.getInstance();
@@ -47,10 +44,10 @@ public class RecruitmentView extends VBox {
 
     private void buildHeader() {
         VBox titleBox = new VBox(4);
-        Label title = new Label("Recruitment & Candidate Ranking");
-        title.setStyle("-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #ffffff;");
+        Label title = new Label("Candidate Pipeline & Algorithmic Screening");
+        title.setStyle("-fx-font-size: 22px; -fx-font-weight: 800; -fx-text-fill: #261B12;");
         Label subtitle = new Label("HashMap indexing, Linear prefix search, Selection/Insertion Sort ranking, and Stack-based Undo/Redo.");
-        subtitle.setStyle("-fx-font-size: 13px; -fx-text-fill: #94a3b8;");
+        subtitle.setStyle("-fx-font-size: 13px; -fx-text-fill: #786958;");
         titleBox.getChildren().addAll(title, subtitle);
         getChildren().add(titleBox);
     }
@@ -65,7 +62,7 @@ public class RecruitmentView extends VBox {
         VBox searchBox = new VBox(4);
         HBox.setHgrow(searchBox, Priority.ALWAYS);
         Label searchLabel = new Label("HashMap + Linear Search Autocomplete:");
-        searchLabel.setStyle("-fx-font-size: 12px; -fx-font-weight: 600; -fx-text-fill: #cbd5e1;");
+        searchLabel.setStyle("-fx-font-size: 12px; -fx-font-weight: 700; -fx-text-fill: #5C4D3E;");
 
         skillSearchField.setPromptText("Type a skill (e.g. Java, Python, React, SQL, AWS)...");
         skillSearchField.getStyleClass().add("search-field");
@@ -75,14 +72,13 @@ public class RecruitmentView extends VBox {
 
         VBox spinnerBox = new VBox(4);
         Label spinnerLabel = new Label("Top K (Selection Sort):");
-        spinnerLabel.setStyle("-fx-font-size: 12px; -fx-font-weight: 600; -fx-text-fill: #cbd5e1;");
-        topKSpinner.setStyle("-fx-background-color: #1e293b;");
+        spinnerLabel.setStyle("-fx-font-size: 12px; -fx-font-weight: 700; -fx-text-fill: #5C4D3E;");
         topKSpinner.setPrefWidth(90);
         spinnerBox.getChildren().addAll(spinnerLabel, topKSpinner);
 
         Button rankBtn = new Button("⚡ Rank via Selection Sort");
         rankBtn.getStyleClass().add("btn-primary");
-        rankBtn.setStyle("-fx-padding: 10 16;");
+        rankBtn.setStyle("-fx-padding: 9 16;");
         rankBtn.setOnAction(e -> runSelectionSortRanking());
 
         Button insertionBtn = new Button("Sort via Insertion Sort");
@@ -111,7 +107,7 @@ public class RecruitmentView extends VBox {
         activeSkillsFilter.setVgap(8);
 
         // History status
-        historyStatusLabel.setStyle("-fx-font-size: 11.5px; -fx-text-fill: #818cf8; -fx-font-style: italic;");
+        historyStatusLabel.setStyle("-fx-font-size: 11.5px; -fx-text-fill: #C2410C; -fx-font-weight: 600; -fx-font-style: italic;");
 
         controlCard.getChildren().addAll(row1, suggestionsPane, activeSkillsFilter, historyStatusLabel);
         getChildren().add(controlCard);
@@ -126,14 +122,14 @@ public class RecruitmentView extends VBox {
         List<String> suggestions = context.getCandidateService().autocompleteSkills(query, 6);
         if (suggestions.isEmpty()) {
             Label noMatch = new Label("No matching skill found");
-            noMatch.setStyle("-fx-text-fill: #64748b; -fx-font-size: 11.5px; -fx-font-style: italic;");
+            noMatch.setStyle("-fx-text-fill: #A89A88; -fx-font-size: 11.5px; -fx-font-style: italic;");
             suggestionsPane.getChildren().add(noMatch);
             return;
         }
 
         for (String skill : suggestions) {
             Button chip = new Button("+ " + skill);
-            chip.setStyle("-fx-background-color: #1e293b; -fx-text-fill: #818cf8; -fx-background-radius: 12; -fx-padding: 4 10; -fx-font-size: 11.5px; -fx-cursor: hand;");
+            chip.setStyle("-fx-background-color: #FEF3C7; -fx-text-fill: #92400E; -fx-background-radius: 12; -fx-padding: 4 10; -fx-font-size: 11.5px; -fx-font-weight: 600; -fx-cursor: hand; -fx-border-color: #FDE68A; -fx-border-radius: 12;");
             chip.setOnAction(e -> addFilterSkill(skill));
             suggestionsPane.getChildren().add(chip);
         }
@@ -157,11 +153,11 @@ public class RecruitmentView extends VBox {
         for (String skill : selectedFilterSkills) {
             HBox chip = new HBox(6);
             chip.setAlignment(Pos.CENTER);
-            chip.setStyle("-fx-background-color: #312e81; -fx-background-radius: 12; -fx-padding: 3 8;");
+            chip.setStyle("-fx-background-color: #EA580C; -fx-background-radius: 12; -fx-padding: 3 9;");
             Label label = new Label(skill);
-            label.setStyle("-fx-text-fill: #ffffff; -fx-font-size: 11.5px; -fx-font-weight: 600;");
+            label.setStyle("-fx-text-fill: #FFFFFF; -fx-font-size: 11.5px; -fx-font-weight: 700;");
             Button remove = new Button("×");
-            remove.setStyle("-fx-background-color: transparent; -fx-text-fill: #f43f5e; -fx-padding: 0; -fx-font-weight: bold; -fx-cursor: hand;");
+            remove.setStyle("-fx-background-color: transparent; -fx-text-fill: #FFEDD5; -fx-padding: 0; -fx-font-weight: bold; -fx-cursor: hand;");
             remove.setOnAction(e -> removeFilterSkill(skill));
             chip.getChildren().addAll(label, remove);
             activeSkillsFilter.getChildren().add(chip);
@@ -192,8 +188,8 @@ public class RecruitmentView extends VBox {
                     setText(null);
                 } else {
                     setText(String.format("%.1f %%", score));
-                    setStyle("-fx-font-weight: bold; -fx-text-fill: " +
-                            (score >= 85 ? "#34d399" : score >= 70 ? "#38bdf8" : "#fbbf24"));
+                    setStyle("-fx-font-weight: 700; -fx-text-fill: " +
+                            (score >= 85 ? "#15803D" : score >= 70 ? "#C2410C" : "#B45309"));
                 }
             }
         });
@@ -225,10 +221,15 @@ public class RecruitmentView extends VBox {
                     setGraphic(null);
                 } else {
                     Label badge = new Label(status);
-                    badge.setStyle("-fx-font-size: 11px; -fx-padding: 3 8; -fx-background-radius: 10; " +
-                            (status.contains("SHORTLIST") ? "-fx-background-color: rgba(16,185,129,0.2); -fx-text-fill: #34d399;" :
-                             status.contains("INTERVIEW") ? "-fx-background-color: rgba(99,102,241,0.2); -fx-text-fill: #818cf8;" :
-                             "-fx-background-color: rgba(148,163,184,0.2); -fx-text-fill: #94a3b8;"));
+                    if (status.contains("SHORTLIST")) {
+                        badge.setStyle("-fx-background-color: #DCFCE7; -fx-text-fill: #15803D; -fx-font-weight: 700; -fx-font-size: 11px; -fx-padding: 3 8; -fx-background-radius: 8;");
+                    } else if (status.contains("INTERVIEW")) {
+                        badge.setStyle("-fx-background-color: #FEF3C7; -fx-text-fill: #B45309; -fx-font-weight: 700; -fx-font-size: 11px; -fx-padding: 3 8; -fx-background-radius: 8;");
+                    } else if (status.contains("REJECT")) {
+                        badge.setStyle("-fx-background-color: #FFE4E6; -fx-text-fill: #BE123C; -fx-font-weight: 700; -fx-font-size: 11px; -fx-padding: 3 8; -fx-background-radius: 8;");
+                    } else {
+                        badge.setStyle("-fx-background-color: #F4EAE0; -fx-text-fill: #6E5F50; -fx-font-weight: 700; -fx-font-size: 11px; -fx-padding: 3 8; -fx-background-radius: 8;");
+                    }
                     setGraphic(badge);
                 }
             }
@@ -242,8 +243,8 @@ public class RecruitmentView extends VBox {
             private final HBox pane = new HBox(6, btnShortlist, btnReject);
 
             {
-                btnShortlist.setStyle("-fx-background-color: #10b981; -fx-text-fill: white; -fx-font-size: 11px; -fx-padding: 3 8; -fx-background-radius: 4; -fx-cursor: hand;");
-                btnReject.setStyle("-fx-background-color: #f43f5e; -fx-text-fill: white; -fx-font-size: 11px; -fx-padding: 3 8; -fx-background-radius: 4; -fx-cursor: hand;");
+                btnShortlist.setStyle("-fx-background-color: #15803D; -fx-text-fill: white; -fx-font-size: 11px; -fx-font-weight: 600; -fx-padding: 3 8; -fx-background-radius: 6; -fx-cursor: hand;");
+                btnReject.setStyle("-fx-background-color: #BE123C; -fx-text-fill: white; -fx-font-size: 11px; -fx-font-weight: 600; -fx-padding: 3 8; -fx-background-radius: 6; -fx-cursor: hand;");
 
                 btnShortlist.setOnAction(e -> {
                     Candidate c = getTableView().getItems().get(getIndex());

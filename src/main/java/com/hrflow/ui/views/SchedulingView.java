@@ -18,6 +18,7 @@ import java.util.Set;
 
 /**
  * Interview Scheduling View powered by Queue & PriorityQueue with Availability Checking.
+ * Soft Warm Light Yellowish-Orange Theme.
  */
 public class SchedulingView extends VBox {
     private final AppContext context = AppContext.getInstance();
@@ -40,9 +41,9 @@ public class SchedulingView extends VBox {
     private void buildHeader() {
         VBox titleBox = new VBox(4);
         Label title = new Label("Queue-Based Interview Scheduling");
-        title.setStyle("-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #ffffff;");
+        title.setStyle("-fx-font-size: 22px; -fx-font-weight: 800; -fx-text-fill: #261B12;");
         Label subtitle = new Label("Processes interview requests via Queue / Priority Queue with fast slot and room availability checking.");
-        subtitle.setStyle("-fx-font-size: 13px; -fx-text-fill: #94a3b8;");
+        subtitle.setStyle("-fx-font-size: 13px; -fx-text-fill: #786958;");
         titleBox.getChildren().addAll(title, subtitle);
         getChildren().add(titleBox);
     }
@@ -54,10 +55,9 @@ public class SchedulingView extends VBox {
 
         VBox queueModeBox = new VBox(4);
         Label qLabel = new Label("Queue Processing Strategy:");
-        qLabel.setStyle("-fx-font-size: 12px; -fx-font-weight: 600; -fx-text-fill: #cbd5e1;");
+        qLabel.setStyle("-fx-font-size: 12px; -fx-font-weight: 700; -fx-text-fill: #5C4D3E;");
         queueModeCombo.getItems().addAll("Priority Queue (Score Order)", "FIFO Queue (Arrival Order)");
         queueModeCombo.setValue("Priority Queue (Score Order)");
-        queueModeCombo.setStyle("-fx-background-color: #1e293b;");
         queueModeBox.getChildren().addAll(qLabel, queueModeCombo);
 
         Region spacer = new Region();
@@ -81,7 +81,7 @@ public class SchedulingView extends VBox {
 
         HBox statusRow = new HBox();
         statusRow.setAlignment(Pos.CENTER_LEFT);
-        conflictStatusLabel.setStyle("-fx-font-size: 12.5px; -fx-font-weight: 600; -fx-text-fill: #34d399;");
+        conflictStatusLabel.setStyle("-fx-font-size: 12.5px; -fx-font-weight: 700; -fx-text-fill: #15803D;");
         statusRow.getChildren().add(conflictStatusLabel);
 
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
@@ -100,7 +100,7 @@ public class SchedulingView extends VBox {
                 if (empty || time == null) setText(null);
                 else {
                     setText(time.toString());
-                    setStyle("-fx-font-weight: bold; -fx-text-fill: #818cf8;");
+                    setStyle("-fx-font-weight: 700; -fx-text-fill: #C2410C;");
                 }
             }
         });
@@ -124,7 +124,7 @@ public class SchedulingView extends VBox {
                     setGraphic(null);
                 } else {
                     Label badge = new Label(room);
-                    badge.setStyle("-fx-background-color: rgba(16,185,129,0.15); -fx-text-fill: #34d399; -fx-padding: 3 8; -fx-background-radius: 8; -fx-font-size: 11.5px; -fx-font-weight: 600;");
+                    badge.setStyle("-fx-background-color: #FEF3C7; -fx-text-fill: #92400E; -fx-padding: 3 8; -fx-background-radius: 8; -fx-font-size: 11.5px; -fx-font-weight: 700;");
                     setGraphic(badge);
                 }
             }
