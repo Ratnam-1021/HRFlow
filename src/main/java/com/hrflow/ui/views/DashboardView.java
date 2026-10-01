@@ -45,12 +45,12 @@ public class DashboardView extends VBox {
 
         // Ambient organic waves background
         BannerWaveCanvas waveCanvas = new BannerWaveCanvas();
+        waveCanvas.setManaged(false);
         waveCanvas.setMouseTransparent(true);
-        bannerWrapper.widthProperty().addListener((obs, o, w) -> {
-            if (w.doubleValue() > 0) waveCanvas.resizeAndDraw(w.doubleValue(), bannerWrapper.getHeight());
-        });
-        bannerWrapper.heightProperty().addListener((obs, o, h) -> {
-            if (h.doubleValue() > 0) waveCanvas.resizeAndDraw(bannerWrapper.getWidth(), h.doubleValue());
+        bannerWrapper.layoutBoundsProperty().addListener((obs, oldB, newB) -> {
+            if (newB.getWidth() > 0 && newB.getHeight() > 0) {
+                waveCanvas.resizeAndDraw(newB.getWidth(), newB.getHeight());
+            }
         });
 
         // Header content
@@ -259,15 +259,11 @@ public class DashboardView extends VBox {
 
         // Wave decoration container with smooth 16px corner clip
         WaveCanvas canvas = new WaveCanvas(wavePrimary, waveSecondary);
+        canvas.setManaged(false);
         canvas.setMouseTransparent(true);
-        card.widthProperty().addListener((obs, o, w) -> {
-            if (w.doubleValue() > 0) canvas.resizeAndDraw(w.doubleValue(), card.getHeight());
-        });
-        card.heightProperty().addListener((obs, o, h) -> {
-            if (h.doubleValue() > 0) canvas.resizeAndDraw(card.getWidth(), h.doubleValue());
-        });
 
         StackPane waveWrapper = new StackPane(canvas);
+        waveWrapper.setManaged(false);
         waveWrapper.setMouseTransparent(true);
         Rectangle clip = new Rectangle();
         clip.setArcWidth(32);
@@ -275,6 +271,13 @@ public class DashboardView extends VBox {
         clip.widthProperty().bind(card.widthProperty());
         clip.heightProperty().bind(card.heightProperty());
         waveWrapper.setClip(clip);
+
+        card.layoutBoundsProperty().addListener((obs, oldB, newB) -> {
+            if (newB.getWidth() > 0 && newB.getHeight() > 0) {
+                waveWrapper.resize(newB.getWidth(), newB.getHeight());
+                canvas.resizeAndDraw(newB.getWidth(), newB.getHeight());
+            }
+        });
 
         // Foreground content
         VBox contentBox = new VBox(6);
