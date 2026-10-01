@@ -46,8 +46,12 @@ public class DashboardView extends VBox {
         // Ambient organic waves background
         BannerWaveCanvas waveCanvas = new BannerWaveCanvas();
         waveCanvas.setMouseTransparent(true);
-        waveCanvas.widthProperty().bind(bannerWrapper.widthProperty());
-        waveCanvas.heightProperty().bind(bannerWrapper.heightProperty());
+        bannerWrapper.widthProperty().addListener((obs, o, w) -> {
+            if (w.doubleValue() > 0) waveCanvas.resizeAndDraw(w.doubleValue(), bannerWrapper.getHeight());
+        });
+        bannerWrapper.heightProperty().addListener((obs, o, h) -> {
+            if (h.doubleValue() > 0) waveCanvas.resizeAndDraw(bannerWrapper.getWidth(), h.doubleValue());
+        });
 
         // Header content
         HBox banner = new HBox(20);
@@ -163,22 +167,21 @@ public class DashboardView extends VBox {
     }
 
     private static class BannerWaveCanvas extends Canvas {
-        public BannerWaveCanvas() {
-            widthProperty().addListener(e -> draw());
-            heightProperty().addListener(e -> draw());
-            sceneProperty().addListener((obs, oldVal, newVal) -> {
-                if (newVal != null) javafx.application.Platform.runLater(this::draw);
-            });
+        public void resizeAndDraw(double w, double h) {
+            if (w <= 0 || h <= 0) return;
+            setWidth(w);
+            setHeight(h);
+            draw(w, h);
         }
 
-        private void draw() {
-            double w = getWidth();
-            double h = getHeight();
-            if (w <= 0 || h <= 0) return;
+        private void draw(double w, double h) {
             GraphicsContext gc = getGraphicsContext2D();
             gc.clearRect(0, 0, w, h);
 
-            // 1. Gentle ambient radial glow centered behind the cards that fades softly to transparent
+            double waveW = Math.min(w * 0.55, 480.0);
+            double startX = w - waveW;
+
+            // 1. Gentle ambient radial glow centered behind the cards
             RadialGradient ambientGlow = new RadialGradient(
                     0, 0, 0.82, 0.5, 0.48, true, CycleMethod.NO_CYCLE,
                     new Stop(0.0, Color.web("#FDE5D2", 0.55)),
@@ -186,10 +189,9 @@ public class DashboardView extends VBox {
                     new Stop(1.0, Color.TRANSPARENT)
             );
             gc.setFill(ambientGlow);
-            gc.fillOval(w * 0.42, -h * 0.25, w * 0.65, h * 1.5);
+            gc.fillOval(startX - 20, -h * 0.25, waveW + 40, h * 1.5);
 
-            // 2. Smooth organic wave sweeping from the right edge, dipping gently and curving back
-            // Fills with a linear gradient fading to transparent at all edges so there are never cut borders
+            // 2. Smooth organic wave sweeping from the right edge, anchored to cards area
             LinearGradient waveGrad1 = new LinearGradient(
                     0, 0.2, 1, 0.8, true, CycleMethod.NO_CYCLE,
                     new Stop(0.0, Color.TRANSPARENT),
@@ -199,8 +201,8 @@ public class DashboardView extends VBox {
             );
             gc.beginPath();
             gc.moveTo(w, h * 0.08);
-            gc.bezierCurveTo(w * 0.72, h * 0.12, w * 0.52, h * 0.38, w * 0.54, h * 0.62);
-            gc.bezierCurveTo(w * 0.56, h * 0.82, w * 0.72, h * 0.88, w, h * 0.82);
+            gc.bezierCurveTo(startX + waveW * 0.45, h * 0.12, startX, h * 0.38, startX + waveW * 0.05, h * 0.62);
+            gc.bezierCurveTo(startX + waveW * 0.10, h * 0.82, startX + waveW * 0.45, h * 0.88, w, h * 0.82);
             gc.closePath();
             gc.setFill(waveGrad1);
             gc.fill();
@@ -215,16 +217,11 @@ public class DashboardView extends VBox {
             );
             gc.beginPath();
             gc.moveTo(w, h * 0.18);
-            gc.bezierCurveTo(w * 0.80, h * 0.26, w * 0.62, h * 0.48, w * 0.66, h * 0.74);
-            gc.bezierCurveTo(w * 0.70, h * 0.88, w * 0.84, h * 0.92, w, h * 0.72);
+            gc.bezierCurveTo(startX + waveW * 0.60, h * 0.26, startX + waveW * 0.20, h * 0.48, startX + waveW * 0.28, h * 0.74);
+            gc.bezierCurveTo(startX + waveW * 0.36, h * 0.88, startX + waveW * 0.68, h * 0.92, w, h * 0.72);
             gc.closePath();
             gc.setFill(waveGrad2);
             gc.fill();
-        }
-
-        @Override
-        public boolean isResizable() {
-            return true;
         }
     }
 
@@ -263,8 +260,12 @@ public class DashboardView extends VBox {
         // Wave decoration container with smooth 16px corner clip
         WaveCanvas canvas = new WaveCanvas(wavePrimary, waveSecondary);
         canvas.setMouseTransparent(true);
-        canvas.widthProperty().bind(card.widthProperty());
-        canvas.heightProperty().bind(card.heightProperty());
+        card.widthProperty().addListener((obs, o, w) -> {
+            if (w.doubleValue() > 0) canvas.resizeAndDraw(w.doubleValue(), card.getHeight());
+        });
+        card.heightProperty().addListener((obs, o, h) -> {
+            if (h.doubleValue() > 0) canvas.resizeAndDraw(card.getWidth(), h.doubleValue());
+        });
 
         StackPane waveWrapper = new StackPane(canvas);
         waveWrapper.setMouseTransparent(true);
@@ -320,24 +321,27 @@ public class DashboardView extends VBox {
         public WaveCanvas(Color primaryColor, Color secondaryColor) {
             this.primaryColor = primaryColor;
             this.secondaryColor = secondaryColor;
-            widthProperty().addListener(e -> draw());
-            heightProperty().addListener(e -> draw());
-            sceneProperty().addListener((obs, oldVal, newVal) -> {
-                if (newVal != null) javafx.application.Platform.runLater(this::draw);
-            });
         }
 
-        private void draw() {
-            double w = getWidth();
-            double h = getHeight();
+        public void resizeAndDraw(double w, double h) {
             if (w <= 0 || h <= 0) return;
+            setWidth(w);
+            setHeight(h);
+            draw(w, h);
+        }
+
+        private void draw(double w, double h) {
             GraphicsContext gc = getGraphicsContext2D();
             gc.clearRect(0, 0, w, h);
 
+            double waveW = Math.min(w * 0.60, 160.0);
+            double startX1 = w - waveW;
+            double startX2 = w - (waveW * 0.72);
+
             // Layer 1: Background softer undulating wave
             gc.beginPath();
-            gc.moveTo(w * 0.28, h);
-            gc.bezierCurveTo(w * 0.46, h - 22, w * 0.68, h - 10, w, h - 34);
+            gc.moveTo(startX1, h);
+            gc.bezierCurveTo(startX1 + waveW * 0.35, h - 22, startX1 + waveW * 0.70, h - 10, w, h - 30);
             gc.lineTo(w, h);
             gc.closePath();
             gc.setFill(secondaryColor);
@@ -345,27 +349,12 @@ public class DashboardView extends VBox {
 
             // Layer 2: Foreground wave curving smoothly across the bottom right
             gc.beginPath();
-            gc.moveTo(w * 0.38, h);
-            gc.bezierCurveTo(w * 0.54, h - 14, w * 0.72, h - 26, w, h - 10);
+            gc.moveTo(startX2, h);
+            gc.bezierCurveTo(startX2 + waveW * 0.30, h - 14, startX2 + waveW * 0.65, h - 24, w, h - 10);
             gc.lineTo(w, h);
             gc.closePath();
             gc.setFill(primaryColor);
             gc.fill();
-        }
-
-        @Override
-        public boolean isResizable() {
-            return true;
-        }
-
-        @Override
-        public double prefWidth(double height) {
-            return getWidth();
-        }
-
-        @Override
-        public double prefHeight(double width) {
-            return getHeight();
         }
     }
 
