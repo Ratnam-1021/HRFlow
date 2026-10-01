@@ -555,23 +555,7 @@ public class DashboardView extends VBox {
             }
         });
 
-        // 8. Actions Column (···)
-        TableColumn<Candidate, Void> colActions = new TableColumn<>("Actions");
-        colActions.setMaxWidth(60);
-        colActions.setCellFactory(col -> new TableCell<>() {
-            private final Button btn = new Button("•••");
-            {
-                btn.setStyle("-fx-background-color: transparent; -fx-text-fill: #8C7A6B; -fx-font-size: 13px; -fx-font-weight: 800; -fx-cursor: hand; -fx-padding: 2 6; -fx-background-radius: 6;");
-                btn.setOnAction(e -> navigationHandler.accept("recruitment"));
-            }
-            @Override
-            protected void updateItem(Void item, boolean empty) {
-                super.updateItem(item, empty);
-                setGraphic(empty ? null : btn);
-            }
-        });
-
-        table.getColumns().addAll(colRank, colCandidate, colRole, colExp, colSkills, colScore, colStatus, colActions);
+        table.getColumns().addAll(colRank, colCandidate, colRole, colExp, colSkills, colScore, colStatus);
 
         List<Candidate> topCandidates = CandidateSortEngine.rankAndGetTopK(
                 context.getCandidateService().getAllCandidates(), Set.of("Java", "Docker", "Spring Boot"), 5
