@@ -227,7 +227,7 @@ public class DashboardView extends VBox {
         row.getChildren().addAll(
                 createMetricCard("👥", "#FFF3EB", "#EA580C", "TOTAL APPLICANTS", String.valueOf(totalCandidates > 0 ? totalCandidates : 250), "Active in database", "Total", "#FFF3EB", "#C2410C",
                         Color.web("#F6D8C2", 0.75), Color.web("#FDF0E6", 0.60)),
-                createMetricCard("👤", "#EFF6FF", "#2563EB", "SHORTLISTED", String.valueOf(shortlistedCount > 0 ? shortlistedCount : 30), "Qualified for next stage", "Qualified", "#FFF3EB", "#EA580C",
+                createMetricCard("👤", "#EFF6FF", "#2563EB", "SHORTLISTED", String.valueOf(shortlistedCount > 0 ? shortlistedCount : 30), "Qualified for next stage", "Qualified", "#DCFCE7", "#15803D",
                         Color.web("#D8E9FE", 0.75), Color.web("#EDF4FE", 0.60)),
                 createMetricCard("🗓️", "#F5F3FF", "#7C3AED", "SCHEDULED SESSIONS", String.valueOf(scheduledCount > 0 ? scheduledCount : 8), "Upcoming interview rounds", "Interviews", "#F5F3FF", "#6D28D9",
                         Color.web("#E7DCFA", 0.75), Color.web("#F5EFFD", 0.60)),
