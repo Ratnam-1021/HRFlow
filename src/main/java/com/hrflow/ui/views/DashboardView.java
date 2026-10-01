@@ -796,6 +796,14 @@ public class DashboardView extends VBox {
         if (file == null) return;
 
         try (PrintWriter writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8))) {
+            String timestamp = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+
+            // Dashboard Heading and Purpose
+            writer.println("Scheduled Candidate Interviews");
+            writer.println("Purpose: Upcoming interview rounds, assigned time slots, and panel reviewers");
+            writer.printf("Generated: %s | Total Scheduled Sessions: %d%n", timestamp, bookings.size());
+            writer.println();
+
             writer.println("Slot,Time Slot,Candidate Name,Applied Role,Assigned Interviewer,Interviewer Role,Allocated Room,Status");
             int slot = 1;
             for (QueueInterviewScheduler.InterviewBooking b : bookings) {
@@ -837,14 +845,22 @@ public class DashboardView extends VBox {
         }
 
         FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Export Candidate Summary (CSV)");
-        fileChooser.setInitialFileName("candidate_summary.csv");
+        fileChooser.setTitle("Export Top Ranked Candidates (CSV)");
+        fileChooser.setInitialFileName("top_ranked_candidates.csv");
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV Files (*.csv)", "*.csv"));
 
         File file = fileChooser.showSaveDialog(window);
         if (file == null) return;
 
         try (PrintWriter writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8))) {
+            String timestamp = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+
+            // Dashboard Heading and Purpose
+            writer.println("Top Ranked Candidates");
+            writer.println("Purpose: Ready for Hiring Manager Reviews (Shortlisted candidates awaiting technical evaluation & hiring decisions)");
+            writer.printf("Generated: %s | Total Candidates: %d%n", timestamp, candidates.size());
+            writer.println();
+
             writer.println("Rank,Candidate Name,Applied Role,Experience (Years),Overall Score (%),Status");
             int rank = 1;
             for (Candidate c : candidates) {
@@ -854,10 +870,10 @@ public class DashboardView extends VBox {
                         escapeCsv(c.getAppliedRole()),
                         c.getExperienceYears(),
                         c.getOverallScore(),
-                        c.getStatus() != null ? c.getStatus().name() : "APPLIED"
+                        c.getStatus() != null ? c.getStatus().name() : "SHORTLISTED"
                 );
             }
-            showAlert("Export Successful", "Candidate summary exported successfully (" + candidates.size() + " candidates):\n" + file.getAbsolutePath());
+            showAlert("Export Successful", "Top Ranked Candidates exported successfully (" + candidates.size() + " candidates):\n" + file.getAbsolutePath());
         } catch (Exception ex) {
             showAlert("Export Error", "Failed to export candidates: " + ex.getMessage());
         }

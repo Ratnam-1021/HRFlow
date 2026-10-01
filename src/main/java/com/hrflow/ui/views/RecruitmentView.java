@@ -378,6 +378,15 @@ public class RecruitmentView extends VBox {
         if (file == null) return;
 
         try (PrintWriter writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8))) {
+            String timestamp = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+            String activeRole = roleFilterCombo.getValue() != null ? roleFilterCombo.getValue() : "All Roles";
+
+            // Heading & Purpose
+            writer.println("Candidate Pipeline Summary");
+            writer.println("Purpose: Evaluated Candidate Pool & Skill-Matching Ranking (Role Filter: " + activeRole + ")");
+            writer.printf("Generated: %s | Total Candidates: %d%n", timestamp, candidateData.size());
+            writer.println();
+
             writer.println("Rank,Candidate Name,Applied Role,Experience (Years),Overall Score (%),Status");
             int rank = 1;
             for (Candidate c : candidateData) {
