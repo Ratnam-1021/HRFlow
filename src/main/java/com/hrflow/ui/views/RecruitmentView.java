@@ -10,6 +10,8 @@ import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.*;
+import javafx.scene.Node;
+import com.hrflow.service.ProfileImageService;
 import com.hrflow.service.ReportExportService;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
@@ -195,8 +197,28 @@ public class RecruitmentView extends VBox {
         colId.setCellValueFactory(new PropertyValueFactory<>("id"));
         colId.setMaxWidth(90);
 
-        TableColumn<Candidate, String> colName = new TableColumn<>("Candidate Name");
-        colName.setCellValueFactory(new PropertyValueFactory<>("name"));
+        TableColumn<Candidate, Candidate> colName = new TableColumn<>("Candidate Name");
+        colName.setMinWidth(180);
+        colName.setCellValueFactory(cellData -> new javafx.beans.property.SimpleObjectProperty<>(cellData.getValue()));
+        colName.setCellFactory(col -> new TableCell<>() {
+            @Override
+            protected void updateItem(Candidate c, boolean empty) {
+                super.updateItem(c, empty);
+                if (empty || c == null) {
+                    setGraphic(null);
+                    setText(null);
+                } else {
+                    HBox box = new HBox(10);
+                    box.setAlignment(Pos.CENTER_LEFT);
+                    Node avatar = ProfileImageService.createAvatarNode(c, 28);
+                    Label nameLbl = new Label(c.getName());
+                    nameLbl.setStyle("-fx-font-weight: 700; -fx-font-size: 13px; -fx-text-fill: #1A110B;");
+                    box.getChildren().addAll(avatar, nameLbl);
+                    setGraphic(box);
+                    setText(null);
+                }
+            }
+        });
 
         TableColumn<Candidate, String> colRole = new TableColumn<>("Applied Role");
         colRole.setCellValueFactory(new PropertyValueFactory<>("appliedRole"));

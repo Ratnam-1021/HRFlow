@@ -5,6 +5,7 @@ import com.hrflow.dsa.sort.CandidateSortEngine;
 import com.hrflow.model.Candidate;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
@@ -23,6 +24,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import com.hrflow.dsa.queue.QueueInterviewScheduler;
+import com.hrflow.service.ProfileImageService;
 import com.hrflow.service.ReportExportService;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
@@ -159,14 +161,7 @@ public class DashboardView extends VBox {
         card2.setPadding(new Insets(10));
         card2.setStyle("-fx-background-color: #FFFFFF; -fx-background-radius: 18px; -fx-border-color: #F3E6D6; -fx-border-radius: 18px; -fx-border-width: 1.5px; -fx-effect: dropshadow(gaussian, rgba(180, 105, 30, 0.16), 22, 0, 0, 8);");
 
-        HBox avBox = new HBox();
-        avBox.setAlignment(Pos.CENTER);
-        avBox.setPrefSize(38, 38);
-        avBox.setMaxSize(38, 38);
-        avBox.setStyle("-fx-background-color: #FFF2E8; -fx-background-radius: 10px; -fx-border-color: #FED7AA; -fx-border-radius: 10px; -fx-border-width: 1px;");
-        Label avIcon = new Label("👤");
-        avIcon.setStyle("-fx-font-size: 18px; -fx-text-fill: #EA580C;");
-        avBox.getChildren().add(avIcon);
+        Node avBox = ProfileImageService.createAvatarNode("HERO-001", "Aarav Sharma", 38);
 
         Region line1 = new Region(); line1.setPrefSize(68, 5); line1.setMaxSize(68, 5); line1.setStyle("-fx-background-color: #E2D4C4; -fx-background-radius: 3px;");
         Region line2 = new Region(); line2.setPrefSize(46, 5); line2.setMaxSize(46, 5); line2.setStyle("-fx-background-color: #EBE0D2; -fx-background-radius: 3px;");
@@ -533,16 +528,7 @@ public class DashboardView extends VBox {
                     HBox box = new HBox(10);
                     box.setAlignment(Pos.CENTER_LEFT);
 
-                    String initials = getInitials(c.getName());
-                    Label av = new Label(initials);
-                    av.setPrefSize(30, 30);
-                    av.setMinSize(30, 30);
-                    av.setAlignment(Pos.CENTER);
-                    if (getIndex() % 2 == 0) {
-                        av.setStyle("-fx-background-color: #FFF2E8; -fx-text-fill: #EA580C; -fx-font-weight: 800; -fx-font-size: 11px; -fx-background-radius: 50%;");
-                    } else {
-                        av.setStyle("-fx-background-color: #F5EFE6; -fx-text-fill: #786958; -fx-font-weight: 800; -fx-font-size: 11px; -fx-background-radius: 50%;");
-                    }
+                    Node av = ProfileImageService.createAvatarNode(c, 32);
 
                     Label nameLbl = new Label(c.getName());
                     nameLbl.setStyle("-fx-font-weight: 700; -fx-font-size: 13px; -fx-text-fill: #1A110B;");
@@ -700,10 +686,7 @@ public class DashboardView extends VBox {
                     HBox box = new HBox(10);
                     box.setAlignment(Pos.CENTER_LEFT);
 
-                    Label avatar = new Label(getInitials(c.getName()));
-                    avatar.setPrefSize(34, 34);
-                    avatar.setAlignment(Pos.CENTER);
-                    avatar.setStyle("-fx-background-color: #FFE6D5; -fx-text-fill: #C2410C; -fx-font-weight: 800; -fx-font-size: 12px; -fx-background-radius: 50%;");
+                    Node avatar = ProfileImageService.createAvatarNode(c, 34);
 
                     VBox nameBox = new VBox(2);
                     Label nameLbl = new Label(c.getName());

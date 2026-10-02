@@ -7,9 +7,11 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.*;
+import com.hrflow.service.ProfileImageService;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -105,9 +107,36 @@ public class SchedulingView extends VBox {
             }
         });
 
-        TableColumn<QueueInterviewScheduler.InterviewBooking, String> colCandidate = new TableColumn<>("Candidate");
-        colCandidate.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(
-                cellData.getValue().getCandidate().getName() + " (" + cellData.getValue().getCandidate().getAppliedRole() + ")"));
+        TableColumn<QueueInterviewScheduler.InterviewBooking, QueueInterviewScheduler.InterviewBooking> colCandidate = new TableColumn<>("Candidate");
+        colCandidate.setMinWidth(190);
+        colCandidate.setCellValueFactory(cellData -> new javafx.beans.property.SimpleObjectProperty<>(cellData.getValue()));
+        colCandidate.setCellFactory(col -> new TableCell<>() {
+            @Override
+            protected void updateItem(QueueInterviewScheduler.InterviewBooking booking, boolean empty) {
+                super.updateItem(booking, empty);
+                if (empty || booking == null || booking.getCandidate() == null) {
+                    setGraphic(null);
+                    setText(null);
+                } else {
+                    Candidate c = booking.getCandidate();
+                    HBox box = new HBox(10);
+                    box.setAlignment(Pos.CENTER_LEFT);
+
+                    Node avatar = ProfileImageService.createAvatarNode(c, 30);
+
+                    VBox nameBox = new VBox(2);
+                    Label nameLbl = new Label(c.getName());
+                    nameLbl.setStyle("-fx-font-weight: 700; -fx-font-size: 13px; -fx-text-fill: #1A110B;");
+                    Label roleLbl = new Label(c.getAppliedRole());
+                    roleLbl.setStyle("-fx-font-size: 11px; -fx-text-fill: #8C7A6B;");
+                    nameBox.getChildren().addAll(nameLbl, roleLbl);
+
+                    box.getChildren().addAll(avatar, nameBox);
+                    setGraphic(box);
+                    setText(null);
+                }
+            }
+        });
 
         TableColumn<QueueInterviewScheduler.InterviewBooking, String> colInterviewer = new TableColumn<>("Assigned Interviewer");
         colInterviewer.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(
